@@ -1,0 +1,52 @@
+<nav class="navbar navbar-inverse navbar-fixed-top"
+  style="background-color: black;" role="navigation"
+  ng-controller="navbarController">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed"
+        data-toggle="collapse" data-target="#navbar"
+        aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span> <span
+          class="icon-bar"></span> <span class="icon-bar"></span> <span
+          class="icon-bar"></span>
+      </button>
+      <div id="menu-toggle" class="navbar-brand" style="background-color: red;">
+        <a href="#" class="btn-menu toggle"> <i
+          class="fa fa-bars"></i>
+        </a>
+      </div>
+      <div class="navbar-brand" style="padding-left: 30px;">
+        <a style="color: white; font-size: 28px;" ui-sref="home">Nextrr</a>
+      </div>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#about">User Profile</a></li>
+        <li><a href="#" ng-click="logout()"> Logout <i class="fa fa-sign-out"
+            aria-hidden="true"></i>
+        </a></li>
+      </ul>
+    </div>
+    <!--/.nav-collapse -->
+  </div>
+</nav>
+<!-- Sidebar -->
+<div id="sidebar-wrapper">
+  <nav id="spy">
+    <ul class="sidebar-nav nav">
+      <li><a ui-sref="user-message"><span class="fa fa-envelope">Inbox <label style="color: red;">{{ unreadMessagesCount }}</label></span></a>
+      </li>
+      <li><a ui-sref="home"> <span
+          class="fa fa-fw fa-dashboard"> Dashboard 
+        </span>
+      </a></li>
+      <li><a ui-sref="movies"> <span class="fa fa-anchor solo">Movies</span>
+      </a></li>
+      <li><a ui-sref="cricket"> <span class="fa fa-anchor solo">Cricket</span>
+      </a></li>
+      <li><a ui-sref="formula-one"> <span class="fa fa-anchor solo">Formula One</span></a></li>
+      <li><a ui-sref="fantasy-cricket"> <span class="fa fa-anchor solo">Fantasy Cricket</span></a></li>
+    </ul>
+  </nav>
+</div>
+<!-- Page content -->

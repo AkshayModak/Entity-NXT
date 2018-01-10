@@ -1,0 +1,46 @@
+<div class="panel">
+    <div class="panel-body" style="border-radius: 0; padding-top: 0;">
+        <h1>Total Matches: {{ filteredCricket.length }}</h1>
+        <div class="row" ng-class="cricket.displayCricket" ng-repeat="cricket in filteredCricket = (filteredCricketList | filter: filterString)" style="padding: 10px; color: white; margin-bottom: 10px !important; background-color: {{ cricket.barColor }};">
+          <div class="row padding-0 margin-0">
+            <div class="col-xs-3 padding-0">
+                <ul class="list-unstyled">
+                    <li>
+                        <div class="col-xs-3 padding-0">
+                            <img ng-src="{{ cricket.team_one_flag }}" style="width:30px; height: 18px;" alt="India Flag">
+                        </div>
+                        <div class="col-xs-9 padding-0">
+                            <strong>{{ cricket.team_one_geoId }}</strong>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="col-xs-3 padding-0">
+                            <img ng-src="{{ cricket.team_two_flag }}" style="width:30px; height: 18px;" alt="India Flag">
+                        </div>
+                        <div class="col-xs-9 padding-0">
+                            <strong>{{ cricket.team_two_geoId }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="row col-md-5 margin-0" style="padding-bottom: 0;">
+                <ul class="list-unstyled text-center">
+                    <li><strong>{{ cricket.match_number }} {{ cricket.sports_child_type_id }}</strong></li>
+                    <li>{{ cricket.stadium }}, {{ cricket.city }}</li>
+                    <li>{{ cricket.series_description }}, {{ cricket.year }}</li>
+                </ul>
+            </div>
+            <div class="col-xs-4 padding-0 text-center">
+                <ul class="list-unstyled">
+                    <li>
+                        <strong>{{ cricket.match_from_date }} 
+                        <span ng-if="cricket.match_to_date"> - </span>
+                        {{ cricket.match_to_date }}</strong>
+                    </li>
+                    <li><strong>{{ cricket.time }}</strong></li>
+                </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>

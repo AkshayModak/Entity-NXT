@@ -1,0 +1,10 @@
+<h1>{{ galleryImages.movieName }}</h1>
+
+<div class="col-lg-4" ng-repeat="galleryImage in galleryImages.images">
+	<div class="thumbnail">
+		<a href="FirstServlet2">
+			<img ng-src="{{galleryImage}}" alt="{{galleryImages.movieName}}"  style="height: 300px; width: 250px;">
+		</a>
+	</div>
+</div>
+

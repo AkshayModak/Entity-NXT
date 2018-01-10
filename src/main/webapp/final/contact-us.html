@@ -1,0 +1,36 @@
+<div class="container disclaimer">
+    <div class="row">
+        <div uib-alert ng-repeat="alert in alerts" ng-class="'alert-' + (alert.type)" style="z-index: 999; font-size: 18px;" class="alert-fade" close="closeAlert($index)" dismiss-on-timeout="5000">{{alert.msg}}</div>
+        <h1>About Us</h1>
+        <p>Hey there,</p>
+        <p>My name's Akshay. I'm the one who designed and developed this website. I have started it as a side-project and not running it for any financial profit though I like to experiment with new technologies on it and try to improve it.</p>
+        <p>I am a software engineer with 2+ years of experience on Java, XML, FTL, AngularJS, Mysql. Currently Working with a private IT company in Indore.</p> 
+        <p>Still, people sometimes write in to ask what software I use, or what hardware I use, and I'm putting that here:</p>
+        <ul>
+            <li>Designed it on ubuntu on a dell laptop.</li>
+            <li>Java, XML for backend.</li>
+            <li>Using Mysql as primary database.</li>
+            <li>AngularJs, css, bootstrap and html for front-end.</li>
+        </ul>
+        <p>Tested this website on Chome and Mozilla Firefox. If you find any issues you can let me know. I will try to fix it ASAP.</p>
+        <p>Since it's just a side-project for me. If you would like to suggest any improvement(s) to existing designs or something or just want to request any new feature. Just let me know. I will try to add that
+        feature/improvement in the website. (no guarantees)</p>
+
+        <p>Thanks for visiting this website. Below is the form through which you can contact me.</p>
+        <p>Keep visiting. :)</p>
+
+        <h2>Contact Us</h2>
+        <form>
+            <div class="form-group">
+                <label for="email">Email address:</label>
+                <input name="email" type="email" ng-model="contact.email" class="form-control" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="pwd">Message:</label>
+                <textarea name="message" ng-model="contact.message" maxlength="1000" class="form-control" id="message" required></textarea>
+                <span class="help-block">{{1000 - contact.message.length}} characters left</span>
+            </div>
+            <button type="submit" class="btn btn-default" ng-click="setMessage(contact)">Submit</button>
+        </form>
+    </div>
+</div>

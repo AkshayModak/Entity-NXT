@@ -1,0 +1,68 @@
+  <md-toolbar class="md-hue-2">
+    <md-tabs md-dynamic-height md-border-bottom md-selected="selectedType">
+      <md-tab label="Hollywood" ui-sref="movies({ movieType: 'hollywood' })">
+        <div ui-view>
+            <md-content class="md-padding padding-0">
+                <md-input-container class="md-block">
+                    <input ng-model="filterMovie" type="text">
+                    <md-icon md-font-icon="fa fa-search"></md-icon>
+                </md-input-container>
+                <uib-accordion>
+                  <div ng-repeat= "movie in movies | filter: filterMovie" uib-accordion-group class="movie-bar" is-open="status.open" style="background-color: {{ movie.movieColor }} !important; display: {{ movie.displayMovie }};">
+                    <uib-accordion-heading>
+                        <strong>
+                          <div class="row">
+                            <div class="col-xs-6 divider text-center">
+                              {{ movie.movieName }}
+                            </div>
+                            <div class="col-xs-6 pull-right">
+                              {{ movie.releaseDate }}
+                              <i class="pull-right glyphicon" ng-class="{'fa fa-sort-desc': status.open, 'fa fa-sort-asc': !status.open}"></i>
+                            </div>
+                          </div>
+                        </strong>
+                    </uib-accordion-heading>
+                    <ul class="list-inline text-center" style="display: block; background-color: white;">
+                      <li class="col-xs-12">{{ movie.cast }}</li>
+                      <li class="col-xs-12" ng-if="movie.trailer">
+                      <button type="submit" style="color: white;" class="btn btn-link" ng-click="open(movie)"><i class="fa fa-video-camera" aria-hidden="true"></i></button></li>
+                    </ul>
+                  </div>
+                </uib-accordion>
+            </md-content>
+        </div>
+      </md-tab>
+      <md-tab label="Bollywood" ui-sref="movies({ movieType: 'bollywood' })">
+        <div ui-view="bollywood">
+            <md-content class="md-padding padding-0">
+                <md-input-container class="md-block">
+                    <input ng-model="filterMovie" type="text">
+                    <md-icon md-font-icon="fa fa-search"></md-icon>
+                </md-input-container>
+                <uib-accordion>
+                  <div ng-repeat= "movie in movies | filter: filterMovie" uib-accordion-group class="movie-bar" is-open="status.open" style="background-color: {{ movie.movieColor }} !important; display: {{ movie.displayMovie }};">
+                    <uib-accordion-heading>
+                        <strong>
+                          <div class="row">
+                            <div class="col-xs-6 divider text-center">
+                              {{ movie.movieName }} 
+                            </div>
+                            <div class="col-xs-6 pull-right  text-center">
+                              {{ movie.releaseDate }}
+                            </div>
+                          </div>
+                        </strong>
+                    </uib-accordion-heading>
+                    <ul class="list-inline text-center" style="display: block; background-color: white;">
+                      <li class="col-xs-12">{{ movie.cast }}</li>
+                      <li class="col-xs-12" ng-if="movie.trailer">
+                      <button type="submit" style="color: white;" class="btn btn-link" ng-click="open(movie)"><i class="fa fa-video-camera" aria-hidden="true"></i></button></li>
+                    </ul>
+                  </div>
+                </uib-accordion>
+            </md-content>
+        </div>
+      </md-tab>
+    </md-tabs>
+  </md-toolbar>  
+</div>

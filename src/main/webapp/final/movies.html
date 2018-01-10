@@ -1,0 +1,17 @@
+<div class="container" style="padding-top: 100px;">
+  <md-switch ng-model="released" ng-change="showAllMovies(movies)">
+    Released Movies
+  </md-switch>
+</div>
+<div class="container hidden-xs hidden-sm" ng-include="'/final/desktop/desktopMovies.html'"></div>
+<div class="visible-xs visible-sm" ng-include="'/final/mobile/mobileMovies.html'"></div>
+<!--MODAL WINDOW-->
+<script type="text/ng-template" id="myModalContent.html">
+    <div modal-movable>
+        <div class="modal-body">
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe class="embed-responsive-item" ng-src="{{ trustSrc(trailer) }}" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</script>

@@ -1,0 +1,187 @@
+<div class="dashboard">
+  <div class="row">
+    <div class="col-xs-12 col-md-3">
+      <div class="dashboard-mini-cards">
+        <h3>Cricket</h3>
+        <label>Leagues: <span>{{ cricket.totalLeagues }}</span></label>
+        <h1>{{ cricket.totalRecords }}</h1>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-3">
+      <div class="dashboard-mini-cards">
+        <h3>Movies</h3>
+        <label>Released: <span>{{ movies.released }}</span></label>
+        <label>Upcoming: <span>{{ movies.upcoming }}</span></label>
+        <h1>
+          {{ movies.totalRecords }}
+        </h1>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-3">
+      <div class="dashboard-mini-cards">
+        <h3>Formula One</h3>
+        <label>Finished: <span>{{ f1.finished }}</span></label>
+        <h1>{{ f1.totalRecords }}</h1>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-3">
+      <div class="dashboard-mini-cards">
+        <h3>Fantasy Cricket</h3>
+        <label>Countries: <span>{{ fc.totalCountries }}</span></label>
+        <h1>{{ fc.totalRecords }}</h1>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-md-6">
+      <div class="dashboard-medium-cards">
+        <h1>Detailed Visit Graphs</h1>
+        <canvas id="line" class="chart chart-line" chart-data="data"
+          chart-labels="labels" chart-series="series"
+          chart-options="options"
+          chart-dataset-override="datasetOverride" chart-click="onClick">
+        </canvas>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-6">
+      <div class="dashboard-medium-cards">
+        <h1>Visits By Countries</h1>
+        <canvas id="doughnut" class="chart chart-doughnut" responsive="true"
+          chart-colors="donutColors" chart-data="donutData"
+          chart-labels="donutLabels">
+        </canvas>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-md-6">
+      <div class="dashboard-medium-cards">
+        <h1>Recent Visits</h1>
+        <table class="table table-condensed">
+          <thead>
+            <tr>
+              <th>IpAddress</th>
+              <th>URI</th>
+              <th>Country</th>
+              <th>City</th>
+              <th>Date</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="visit in filteredVisits">
+              <td>{{ visit.userIp }}</td>
+              <td>{{ visit.requestUri }}</td>
+              <td>{{ visit.userCountry }}</td>
+              <td>{{ visit.userCity }}</td>
+              <td>{{ visit.requestDate }}</td>
+              <td>{{ visit.requestTime }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ul uib-pagination ng-model="currentPage" class="pull-right"
+          total-items="visits.length" max-size="maxSize"
+          boundary-links="true"></ul>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-6">
+      <div class="dashboard-medium-cards">
+        <h1>IP Details and Status</h1>
+        <table class="table table-condensed">
+          <thead>
+            <tr>
+              <th>Blacklist</th>
+              <th>IpAddress</th>
+              <th>Status</th>
+              <th>Country</th>
+              <th>City</th>
+              <th>Total Visits</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="visitAnalysis in filteredVisitsAnalysis">
+              <td><input type="checkbox" name="disableIP" /></td>
+              <td>{{ visitAnalysis.ipAddress }}</td>
+              <td>{{ visitAnalysis.country }}</td>
+              <td>{{ visitAnalysis.city }}</td>
+              <td>{{ visitAnalysis.status }}</td>
+              <td>{{ visitAnalysis.visits }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ul uib-pagination ng-model="visitPage" class="pull-right"
+          total-items="visitsAnalysis.length" max-size="maxSize"
+          boundary-links="true"></ul>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title pull-left">
+                Content Section
+            </h2>
+            <button class="btn btn-default pull-right" ng-click="open(null, 'createContent')">New</button>
+        <div class="clearfix"></div>
+    </div>
+        <div class="panel-body">
+            <div class="col-xs-12 col-md-4" ng-repeat="content in contents">
+                <div class="dashboard-medium-cards">
+                    <h1>
+                      {{ content.description }} <a href="javascript:void(0)"
+                        ng-click="open(content, 'updateContent')"> <i
+                        class="fa fa-pencil-square-o fa-3" aria-hidden="true"></i>
+                      </a>
+                    </h1>
+                    <p>
+                      {{ content.electronicText | limitTo:limitLetters }} <span
+                        ng-if="(content.electronicText.length > 470) && (limitLetters <= 470)">
+                        <a href="javascript:void(0)"
+                        ng-click="seeMore(content.electronicText.length)">see more</a>
+                      </span> <span ng-if="content.electronicText.length > 470 && limitLetters > 470">
+                        <a href="javascript:void(0)" ng-click="seeMore(470)">see
+                          less</a>
+                      </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<!--MODAL WINDOW-->
+<script type="text/ng-template" id="myModalContent.html">
+    <div>
+        <div class="modal-header">
+            Home_Movies_Section
+        </div>
+        <div class="modal-body">
+            <input type="hidden" name="contentId" ng-model="content.content_id"/>
+            <div class="form-group">
+                <label for="screen">Screen:</label>
+                <input type="text" name="screen" class="form-control" ng-model="content.screen_content" id="screen">
+            </div>
+            <div class="form-group">
+                <label for="contentType">Content:</label>
+                <input type="text" name="contentType" class="form-control" ng-model="content.content_type" id="contentType">
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <input type="text" name="description" class="form-control" ng-model="content.description" id="description">
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea name="content" rows="8" class="form-control" ng-model="content.electronicText"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" ng-click="manipulateContent(content)">
+                <span ng-if="content.content_id">Update</span>
+                <span ng-if="!content.content_id">Create</span>
+            </button>
+            <button type="button" class="btn btn-default" ng-click="close()">Cancel</button>
+            <button type="button" class="btn btn-danger pull-left" ng-click="removeContent(content)">Delete</button>
+        </div>
+    </div>
+</script>

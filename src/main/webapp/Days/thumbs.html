@@ -1,0 +1,28 @@
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="input-group">
+            <input type="number" class="form-control" min="1" max="12" ng-model="totalImages">
+            <div class="input-group-addon">
+                <input type="checkbox" ng-model="showDefault" title="See All"/>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" ng-repeat="thumbnailImage in thumbnailImages | limitTo: totalImages" ng-hide="showDefault">
+    		<div class="hovereffect">
+        		<a ui-sref="movieDetails({movieId: '{{thumbnailImage.movieId}}'})" style="color: white">
+        			<img class="img-responsive" ng-src="{{ thumbnailImage.movieImagePath }}" alt="{{ thumbnailImage.alt }}">
+            		<div class="overlay">
+                		<h2>Effect {{ $index + 1 }}</h2>
+							<p> 
+								{{thumbnailImage.movieName}}
+							</p> 
+            		</div>
+            	</a>
+    		</div>
+		</div>
+        <div class="col-xs-6 col-md-3" ng-repeat="defaultImage in defaultImages | limitTo: totalImages" ng-show="showDefault">
+            <a href="#" class="thumbnail">
+                <img ng-src='{{ defaultImage.imagePath }}' alt="{{ defaultImage.alt }}"/>
+            </a>
+        </div>
+    </div>
+</div>

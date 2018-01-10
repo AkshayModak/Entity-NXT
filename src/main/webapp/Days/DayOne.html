@@ -1,0 +1,146 @@
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Panel Heading
+      </div>
+      <div>
+      	<div class="panel-body">
+          <div class="row">
+            <div class="col-lg-6">
+          	  <div class="form-group">
+          	  	<label for="Name">Name:</label>
+                <input type="text" class="form-control" ng-model="employee.name" id="Name"/>
+              </div>
+            </div><!-- /.row-->
+            <div class="col-lg-6">
+          	  <div class="form-group">
+          	  	<label for="Name">Age:</label>
+                <input type="text" class="form-control" ng-model="employee.age" id="Age"/>
+              </div>
+            </div><!-- /.col-lg-6 -->
+          </div><!-- /.row -->
+          <div class="row">
+            <div class="col-lg-6">
+          	  <div class="form-group">
+          	  	<label for="Name">City:</label>
+                <input type="text" class="form-control" ng-model="employee.city" id="City">
+              </div>
+            </div><!-- /.row-->
+            <div class="col-lg-6">
+          	  <div class="form-group">
+          	  	<label for="Name">Country:</label>
+                <input type="text" class="form-control" ng-model="employee.country" id="Country">
+              </div>
+            </div><!-- /.col-lg-6 -->
+          </div><!-- /.row -->
+          <div class="row">
+          	<div class="col-lg-12">
+          	  <div class="form-group">
+          	  	<label for="Image">Image:</label>
+                <select ng-model="employee.flagUrl" class="form-control" id="Image">
+                  <option value="images/au.png">Australia</option>
+                  <option value="images/ca.png">Canada</option>
+                  <option value="images/de.png">Denmark</option>
+                  <option value="images/gb.png">Britain</option>
+                  <option value="images/il.png">Israel</option>
+                  <option value="images/india-flag.png">India</option>
+                  <option value="images/jp.png">Japan</option>
+                </select>
+              </div>
+            </div>
+          </div><!-- /.row -->
+        </div>
+      
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Age</th>
+              <th>City</th>
+              <th>Country</th>
+              <th>Flag</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ employee.name }}</td>
+              <td>{{ employee.age }}</td>
+              <td>{{ employee.city }}</td>
+              <td>{{ employee.country }}</td>
+              <td><img ng-src="{{ employee.flagUrl }}" alt="{{ employee.country + 'flag' }}"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Ng-Repeat Table with Likes/Dislikes options
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-xs-6 col-sm-3 col-md-1">
+          	<label for="totalRows">Rows:</label>
+            <input type="number" step="1" class="form-control" ng-model="totalRows" min="1" max="6" id="totalRows"/>
+          </div>
+        </div>
+      </div>
+      <table class="table table-condensed table-bordered">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>City</th>
+            <th>Country</th>
+            <th>Likes</th>
+            <th>Dislikes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="employee1 in employees | limitTo: totalRows">
+            <td>{{ employee1.name }}</td>
+            <td>{{ employee1.age }}</td>
+            <td>{{ employee1.city }}</td>
+            <td>{{ employee1.country }}</td>
+            <td>{{ employee1.likes }}</td>
+            <td>{{ employee1.dislikes }}</td>
+            <td>
+              <button type="button" class="btn btn-success" ng-click="countryLikes(employee1)">Like</button>
+              <button type="button" class="btn btn-danger" ng-click="countryDislikes(employee1)">Dislike</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Nested Ng-Repeat Table
+      </div>
+      <table class="table table-condensed table-bordered">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>City</th>
+            <th>Country</th>
+            <th>Index</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="employee2 in nestedEmployees">
+            <td>{{ employee2.name }}</td>
+            <td>{{ employee2.age }}</td>
+            <td>
+              <select class="form-control">
+            	<option ng-repeat="city in employee2.cities" value="{{ city.name }}">{{ city.name }}</option>
+              </select>
+            </td>
+            <td>{{ employee2.country }}</td>
+            <td>{{ $index }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  

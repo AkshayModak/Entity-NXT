@@ -1,0 +1,17 @@
+ <md-content class="md-padding">
+  <md-input-container class="md-block">
+      <input ng-model="filterMovie" type="text">
+      <md-icon md-font-icon="fa fa-search"></md-icon>
+  </md-input-container>
+  <div ng-repeat= "movie in movies | filter: filterMovie">
+      <div class="movie-bar" style="background-color: {{ movie.movieColor }} !important; display: {{ movie.displayMovie }};">
+          <ul class="list-inline text-center">
+              <li class="col-xs-3">{{ movie.movieName }}</li>
+              <li class="col-xs-6">{{ movie.cast }}</li>
+              <li class="col-xs-2">{{ movie.releaseDate }}</li>
+              <li class="col-xs-1" ng-if="movie.trailer">
+              <button type="submit" class="btn btn-link" ng-click="open(movie)"><i class="fa fa-video-camera" aria-hidden="true"></i></button></li>
+          </ul>
+      </div>
+  </div>
+</md-content>
