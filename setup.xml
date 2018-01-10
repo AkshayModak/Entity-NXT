@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<basic-setup>
+    <DBSettings username="akshay" password="123456"/>
+    <uri host="localhost" port="8080" defaultPath="NextORM"/>
+    <database database-name="next_orm"/>
+</basic-setup>

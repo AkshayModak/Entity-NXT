@@ -1,0 +1,18 @@
+<Redirector>
+    <request>
+        <request-name>f1Schedule</request-name>
+        <file-path>one.DatabaseUtils</file-path>
+        <method>getF1Schedule</method>
+        <show>formula1</show>
+    </request>
+    <request>
+        <request-name>DemoRequest1</request-name>
+        <file-path>one.DatabaseUtil</file-path>
+        <method>one.DatabaseUtil</method>
+        <show>nothing</show>
+    </request>
+    <request>
+        <request-name>home</request-name>
+        <show>home</show>
+    </request>
+</Redirector>
