@@ -27,39 +27,16 @@ import org.w3c.dom.NodeList;
 import architecture.utils.DebugWrapper;
 import one.DefaultObjects;
 import one.ReadXMLFile;
+import architecture.utils.Utility;
 
 public class ReadEntityDefinition {
 
     private List<List> NodeDataList = new ArrayList<List>();
-    final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    private String DB_URL, USER, PASS, DATABASE_NAME, HOST;
     Connection conn;
     private Map<String, Object> tablesMap = new HashMap<String, Object>();
     public final String className = ReadEntityDefinition.class.getName();
 
     private String nextrr_home = System.getProperty("user.dir") + "/";
-
-    private void setDBUrl() {
-        DB_URL = "jdbc:mysql://" + HOST + "/" + DATABASE_NAME;
-    }
-
-    private Map<String, Object> loadDriver() {
-
-        Map<String, Object> successMessage = DefaultObjects.getSuccessMap();
-
-        try {
-            Class.forName(JDBC_DRIVER);
-            DebugWrapper.logInfo("Connecting to " + DATABASE_NAME + " database...", className);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            conn.setAutoCommit(false);
-            DebugWrapper.logInfo("Connected database successfully...", className);
-        } catch (Exception e) {
-            DebugWrapper.logInfo("Error During Loading Driver" + e, className);
-            return DefaultObjects.getErrorMap(e);
-        }
-
-        return successMessage;
-    }
 
     private String getJdbcTypeName(int jdbcType) {
         Map map = new HashMap();
@@ -164,7 +141,7 @@ public class ReadEntityDefinition {
                             String primaryKey = " primary key";
                             createQuery += primaryKey;
                         } else if ("true".equals(column.get("distinct"))) {
-                            String distinct = " distinct";
+                            String distinct = " DISTINCT";
                             createQuery += distinct;
                         }
 
@@ -194,26 +171,35 @@ public class ReadEntityDefinition {
                 if (table != null) {
                     HashSet<String> alterQueries = new HashSet<String>();
                     HashSet<String> modifyQueries = new HashSet<String>();
+                    Boolean removeColumn = false;
                     for (Map<String, Object> column : table) {
                         String columnName = (String) column.get("name");
 
-                        ResultSet rs = null;
-                        rs = metadata.getColumns(null, null, tableName, null);
-                        boolean found = false;
-                        while (rs.next()) {
-                            if ("raceTypeId".equals(rs.getString("COLUMN_NAME"))) {
-                                System.out.println("=====columnName======" + columnName);
-                            } else {
-                                /*
-                                 * System.out.println("==exists==="+columnName);
-                                 */
+                        ResultSet tableRs = metadata.getColumns(null, null, tableName, columnName);
+
+                        //HACK: Need to improve the logic to remove column if not defined in the XML.
+                        Boolean keepColumn = true;
+                        for (Map<String, Object> tableColumn : table) {
+                            columnName = (String) tableColumn.get("name");
+                            ResultSet columnRs = metadata.getColumns(null, null, tableName, null);
+                            while (columnRs.next()) {
+                                String rsTableName = columnRs.getString("TABLE_NAME");
+                                String rsColumnName = columnRs.getString("COLUMN_NAME");
+                                keepColumn = Utility.hasMapKeyValuePair(table, "name", rsColumnName);
+
+                                if (!keepColumn) {
+                                    String alterQuery = " DROP COLUMN " + rsColumnName;
+                                    if (alterQueries.contains(alterQuery)) {
+                                        continue;
+                                    }
+                                    alterQueries.add(alterQuery);
+                                    queriesMap.put("alter-" + tableName, alterQueries);
+                                }
                             }
                         }
 
-                        ResultSet tableRs = metadata.getColumns(null, null, tableName, columnName);
-
                         if (!tableRs.next()) {
-                            String alterQuery = "";
+                            String alterQuery = " ADD";
                             String dataType = (String) column.get("data-type");
                             alterQuery += " " + columnName + " " + dataType + "(" + column.get("column-size") + ")";
 
@@ -392,45 +378,6 @@ public class ReadEntityDefinition {
                                     if (DefaultObjects.isNotEmpty(modifyQuery)) {
                                         modifyQueries.add(modifyQuery);
                                     }
-
-                                    /*
-                                     * String fkTable = null; String fKey =
-                                     * null; if (column.get("fk-table") != null
-                                     * && column.get("f-key") != null) { fkTable
-                                     * = (String) column.get("fk-table"); fKey =
-                                     * (String) column.get("f-key"); } columnRs
-                                     * = metadata.getImportedKeys(null, null,
-                                     * tableName); while(columnRs.next()) {
-                                     * String fktable =
-                                     * columnRs.getString("FKTABLE_NAME");
-                                     * String fkColumn =
-                                     * columnRs.getString("FKCOLUMN_NAME");
-                                     * String fkName =
-                                     * columnRs.getString("FK_NAME"); if
-                                     * ((column.get("fk-table") != null &&
-                                     * column.get("f-key") != null) &&
-                                     * (column.get("fk-table") != fktable ||
-                                     * column.get("f-key") != fkColumn)) {
-                                     * System.out.println(
-                                     * "========tableName========="+tableName);
-                                     * System.out.println(
-                                     * "========fktable========"+fktable);
-                                     * System.out.println(
-                                     * "=========fkColumn=========="+fkColumn);
-                                     * System.out.println(
-                                     * "=========fkName========="+fkName); } }
-                                     */
-
-                                    /*
-                                     * if (column.get("fk-table") != null &&
-                                     * column.get("f-key") != null) {
-                                     * modifyQuery = ""; modifyQuery +=
-                                     * "FOREIGN KEY (" + columnName +
-                                     * ") REFERENCES " + column.get("fk-table")
-                                     * +"(" + column.get("f-key") + ")"; if
-                                     * (DefaultObjects.isNotEmpty(modifyQuery))
-                                     * { modifyQueries.add(modifyQuery); } }
-                                     */
                                 }
                             }
                             if (!modifyQuery.isEmpty()) {
@@ -448,7 +395,7 @@ public class ReadEntityDefinition {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("========e==========" + e);
+            DebugWrapper.logError(e.getMessage(), className);
         }
         return queriesMap;
     }
@@ -497,7 +444,7 @@ public class ReadEntityDefinition {
                 createQueryList.add(query);
             } else if (key.startsWith("alter-")) {
                 String tableName = key.replace("alter-", "");
-                String query = "alter table " + tableName + " add ";
+                String query = "ALTER TABLE " + tableName;
                 Iterator iterator = ((HashSet<Object>) queries.getValue()).iterator();
                 while (iterator.hasNext()) {
                     query += (String) iterator.next();
@@ -518,25 +465,18 @@ public class ReadEntityDefinition {
     }
 
     public String createTable() {
-        String fileName = nextrr_home + "setup.xml";
-        Map<String, Object> setupConfig = ReadXMLFile.getXMLData(fileName);
-        USER = (String) setupConfig.get("username");
-        PASS = (String) setupConfig.get("password");
-        DATABASE_NAME = (String) setupConfig.get("database-name");
-        HOST = (String) setupConfig.get("host");
-
-        setDBUrl();
-        loadDriver();
+        SQLProcessor processor = new SQLProcessor();
+        Map<String, Object> result = processor.loadDriver();
+        conn = (Connection) result.get("connection");
         Statement stmt = null;
         List<String> createQueries = getCreateQueries();
 
         try {
             stmt = conn.createStatement();
             for (String createQuery : createQueries) {
-                System.out.println("========createQuery=======" + createQuery);
                 stmt.addBatch(createQuery);
             }
-            System.out.println("====executing Batch========");
+            DebugWrapper.logDebug("Executing Query Batch", className);
             stmt.executeBatch();//executing the batch
 
             conn.commit();
