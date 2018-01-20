@@ -34,6 +34,17 @@
     <servlet-name>Redirector</servlet-name>
     <servlet-class>architecture.Redirector</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>NextEngine</servlet-name>
+    <servlet-class>architecture.DriverServlet</servlet-class>
+  </servlet>
+
+
+
+  <servlet-mapping>
+    <servlet-name>NextEngine</servlet-name>
+    <url-pattern>/run</url-pattern>
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>Jersey RESTful Application</servlet-name>
     <url-pattern>/rest/*</url-pattern>

@@ -171,4 +171,8 @@ public class DefaultObjects {
         }
         return false;
     }
+
+    public static Boolean isEmpty(Object objValue) {
+        return objValue == null;
+    }
 }
