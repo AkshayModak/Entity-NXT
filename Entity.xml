@@ -21,11 +21,11 @@
 
     <table name="TestEntityReader">
         <column name="Id" data-type="int" unique="true" nullable="false" primary-key="true"/>
-        <column name="TestColumn1" data-type="varchar" column-size="1" nullable="false" primary-key="true"/>
+        <column name="TestColumn1" data-type="int" nullable="false" primary-key="true"/>
         <column name="TestColumn2" data-type="int" nullable="false"/>
-        <column name="TestColumn3" data-type="varchar" column-size="3"  primary-key="true"/>
+        <column name="TestColumn3" data-type="varchar" column-size="3" nullable="false" primary-key="true"/>
         <column name="TestColumn4" data-type="varchar" column-size="4"/>
-        <column name="TestColumn5" data-type="varchar" column-size="5" primary-key="true"/>
+        <column name="TestColumn5" data-type="varchar" column-size="5" nullable="false" primary-key="true"/>
         <column name="TestColumn7" data-type="int" nullable="false"/>
     </table>
     <table name="TestEntityReader1">
@@ -164,13 +164,13 @@
         <column name="TestColumn7" data-type="int" null="false"/>
     </table>
     <table name="TestEntityReader16">
-        <column name="Id" data-type="int" unique="true" null="false"/>
-        <column name="TestColumn1" data-type="varchar" column-size="1" null="false"/>
-        <column name="TestColumn2" data-type="int" null="false"/>
+        <column name="Id" data-type="int" unique="true" nullable="false"/>
+        <column name="TestColumn1" data-type="varchar" column-size="1" nullable="false"/>
+        <column name="TestColumn2" data-type="int" nullable="false"/>
         <column name="TestColumn3" data-type="varchar" column-size="3"/>
         <column name="TestColumn4" data-type="varchar" column-size="4"/>
-        <column name="TestColumn5" data-type="varchar" column-size="5" null="false"/>
-        <column name="TestColumn7" data-type="int" null="false"/>
+        <column name="TestColumn5" data-type="varchar" column-size="5" nullable="false"/>
+        <column name="TestColumn7" data-type="int" nullable="false"/>
     </table>
     <table name="TestEntityReader17">
         <column name="Id" data-type="int" unique="true" null="false"/>

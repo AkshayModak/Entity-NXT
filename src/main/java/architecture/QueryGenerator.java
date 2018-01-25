@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.lang.reflect.Field;
+
 import java.sql.DatabaseMetaData;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import architecture.utils.DebugWrapper;
+import architecture.utils.Utility;
 
 public class QueryGenerator {
 
@@ -21,6 +24,22 @@ public class QueryGenerator {
     public QueryGenerator(Map<String, Object> tablesMap, Connection conn) {
         this.tablesMap = tablesMap;
         this.conn = conn;
+    }
+
+    private String getJdbcTypeName(int jdbcType) {
+        Map map = new HashMap();
+
+        // Get all field in java.sql.Types
+        Field[] fields = java.sql.Types.class.getFields();
+        for (int i = 0; i < fields.length; i++) {
+            try {
+                String name = fields[i].getName();
+                Integer value = (Integer) fields[i].get(null);
+                map.put(value, name);
+            } catch (IllegalAccessException e) {
+            }
+        }
+        return (String) map.get(jdbcType);
     }
 
     protected Map<String, Object> createTableQueries() throws SQLException {
@@ -183,6 +202,154 @@ public class QueryGenerator {
         }
         queryMap.put("pk_constraint", queryList);
         return queryMap;
+    }
+
+    protected Map<String, Object> updateColumn() throws SQLException {
+
+        DatabaseMetaData metadata = null;
+        metadata = conn.getMetaData();
+        List<String> alterList = new ArrayList<>();
+
+        ResultSet resultSet;
+        Map<String, Object> queryMap = new HashMap<String, Object>();
+        List<String> queryList = new ArrayList<String>();
+
+        if (tablesMap.isEmpty()) {
+            queryMap.put("error", "error");
+            return queryMap;
+        }
+
+        for (Map.Entry<String, Object> table : tablesMap.entrySet()) {
+            String tableName = table.getKey();
+            List<Map<String, Object>> tableList = (List<Map<String, Object>>) tablesMap.get(tableName);
+
+            ResultSet columnRs = metadata.getColumns(null, null, tableName, "%");
+
+            Boolean dropColumn = false;
+            while (columnRs.next()) {
+                String rsColumnName = columnRs.getString("COLUMN_NAME");
+                Boolean hasKeyValue = Utility.hasMapKeyValuePair(tableList, "name", rsColumnName);
+                if (!hasKeyValue) {
+                    queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + rsColumnName);
+                }
+            }
+
+            for (Map<String, Object> columnMap : tableList) {
+                alterList.clear();
+                String columnName = (String) columnMap.get("name");
+                columnRs = metadata.getColumns(null, null, tableName, columnName);
+
+                if (columnRs.next()) {
+                    String rsColumnName = columnRs.getString("COLUMN_NAME");
+                    String rsDataType = getJdbcTypeName(columnRs.getShort("DATA_TYPE"));
+                    int rsColumnSize = columnRs.getInt("COLUMN_SIZE");
+                    Boolean isNullable = isNullable(columnRs.getString("NULLABLE"));
+                    Boolean rsIsAutoIncrement = isAutoIncrement(columnRs.getString("IS_AUTOINCREMENT"));
+
+                    if (("int").equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                        columnMap.put("data-type", "INTEGER");
+                    }
+
+                    if (!rsDataType.equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                        alterList.add(columnMap.get("data-type") + " (" + columnMap.get("column-size") + ") ");
+                    }
+
+                    if (columnMap.containsKey("column-size") && (rsColumnSize != (Integer.parseInt((String) columnMap.get("column-size"))))
+                            && (rsDataType.equalsIgnoreCase((String) columnMap.get("data-type")))) {
+                        if (!("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                            alterList.add(" " + (String) columnMap.get("column-size"));
+                        }
+                    }
+                    if(columnMap.containsKey("nullable") && (isNullable != (Boolean.parseBoolean((String) columnMap.get("nullable")))) && !("true".equalsIgnoreCase((String) columnMap.get("auto-increment")))) {
+                        if ("false".equalsIgnoreCase((String) columnMap.get("nullable"))) {
+                            if (!("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                                alterList.add((String) columnMap.get("data-type") + " (" + columnMap.get("column-size") + ") ");
+                            } else if (("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                                alterList.add((String) columnMap.get("data-type"));
+                            }
+                            alterList.add(" NOT NULL");
+                        } else {
+                            alterList.add(" NULL");
+                        }
+                    }
+                    if (columnMap.containsKey("auto-increment") && (("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type")))
+                            && (rsIsAutoIncrement != (Boolean.parseBoolean((String) columnMap.get("auto-increment")))) && ("true".equalsIgnoreCase((String) columnMap.get("auto-increment")))) {
+                        if (!("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                            alterList.add((String) columnMap.get("data-type") + " (" + columnMap.get("column-size") + ") ");
+                        } else if (("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                            alterList.add((String) columnMap.get("data-type"));
+                        }
+                        alterList.add(" AUTO_INCREMENT");
+                    } else if (!columnMap.containsKey("auto-increment") && (("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type")))
+                            && (rsIsAutoIncrement != (Boolean.parseBoolean((String) columnMap.get("auto-increment"))))) {
+                        queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + columnName);
+                        StringBuffer stringBuffer = new StringBuffer();
+                        stringBuffer.append("ALTER TABLE " + tableName);
+                        stringBuffer.append(" ADD COLUMN " + columnName);
+                        stringBuffer.append(" " + columnMap.get("data-type"));
+                        if (!"INTEGER".equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                            stringBuffer.append(" (" + columnMap.get("column-size") + ") ");
+                        }
+                        queryList.add(stringBuffer.toString());
+                    } else if (columnMap.containsKey("auto-increment") && ("false".equalsIgnoreCase((String) columnMap.get("auto-increment")))
+                                && rsIsAutoIncrement != (Boolean.parseBoolean((String) columnMap.get("auto-increment")))) {
+                        queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + columnName);
+                        StringBuffer stringBuffer = new StringBuffer();
+                        stringBuffer.append("ALTER TABLE " + tableName);
+                        stringBuffer.append(" ADD COLUMN " + columnName);
+                        stringBuffer.append(" " + columnMap.get("data-type"));
+                        if (!"INTEGER".equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                            stringBuffer.append(" (" + columnMap.get("column-size") + ") ");
+                        }
+                        queryList.add(stringBuffer.toString());
+                    }
+                    if (!alterList.isEmpty()) {
+                        StringBuffer stringBuffer = new StringBuffer();
+                        stringBuffer.append("ALTER TABLE " + tableName);
+                        stringBuffer.append(" MODIFY COLUMN " + columnName);
+                        for (String alterQuery : alterList) {
+                            stringBuffer.append(" " + alterQuery);
+                        }
+                        queryList.add(stringBuffer.toString());
+                    }
+                } else if (!columnRs.next()){
+                    StringBuffer stringBuffer = new StringBuffer();
+                    stringBuffer.append("ALTER TABLE " + tableName);
+                    stringBuffer.append(" ADD COLUMN " + columnName);
+                    stringBuffer.append(" " + columnMap.get("data-type"));
+                    if (!"int".equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                        stringBuffer.append(" (" + columnMap.get("column-size") + ") ");
+                    }
+                    if (columnMap.containsKey("nullable") && "false".equalsIgnoreCase((String) columnMap.get("nullable"))) {
+                        stringBuffer.append(" NOT NULL");
+                    }
+                    if (("INTEGER".equalsIgnoreCase((String) columnMap.get("data-type"))) && columnMap.containsKey("auto-increment")
+                            && "true".equalsIgnoreCase((String) columnMap.get("auto-increment"))) {
+                        stringBuffer.append(" AUTO_INCREMENT");
+                    }
+                    queryList.add(stringBuffer.toString());
+                }
+            }
+        }
+
+        queryMap.put("update_column", queryList);
+        return queryMap;
+    }
+
+    private Boolean isNullable(String value) {
+        if (("0").equalsIgnoreCase(value)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private Boolean isAutoIncrement(String value) {
+        if ("NO".equalsIgnoreCase(value)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /*private Map<String, Object> setCreateQuery() {
