@@ -32,7 +32,6 @@ public class NextEngine {
         try {
             Map<String, Object> createTableQueries = queryGenerator.createTableQueries();
             Map<String, Object> dropTableQueries = queryGenerator.dropTableQueries();
-            Map<String, Object> createPrimaryKeyQueries = queryGenerator.createPrimaryKeyConstraint();
             Map<String, Object> updateColumnQueries = queryGenerator.updateColumn();
 
             stmt = conn.createStatement();
@@ -44,11 +43,6 @@ public class NextEngine {
             if (!("error").equalsIgnoreCase((String) dropTableQueries.get("error"))) {
                 for (String dropTableQuery : (List<String>) dropTableQueries.get("drop_table")) {
                     stmt.addBatch(dropTableQuery);
-                }
-            }
-            if (!("error").equalsIgnoreCase((String) createPrimaryKeyQueries.get("error"))) {
-                for (String createPrimaryKeyQuery : (List<String>) createPrimaryKeyQueries.get("pk_constraint")) {
-                    stmt.addBatch(createPrimaryKeyQuery);
                 }
             }
             if (!("error").equalsIgnoreCase((String) updateColumnQueries.get("error"))) {

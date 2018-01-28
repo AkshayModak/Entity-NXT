@@ -123,7 +123,7 @@ public class QueryGenerator {
         return queryMap;
     }
 
-    protected Map<String, Object> createPrimaryKeyConstraint() throws SQLException {
+    protected Map<String, Object> createPrimaryKeyConstraint(String tableName) throws SQLException {
         DatabaseMetaData metadata = null;
         metadata = conn.getMetaData();
 
@@ -131,73 +131,78 @@ public class QueryGenerator {
         Map<String, Object> queryMap = new HashMap<String, Object>();
         List<String> queryList = new ArrayList<String>();
 
-        if (tablesMap.isEmpty()) {
+        if (tableName == null) {
             queryMap.put("error", "error");
             return queryMap;
         }
 
-        for (Map.Entry<String, Object> table : tablesMap.entrySet()) {
-            String tableName = table.getKey();
-            ResultSet tableRs = metadata.getTables(null, null, tableName, null);
+        ResultSet tableRs = metadata.getTables(null, null, tableName, null);
 
-            if (tableRs.next()) {
-                StringBuffer stringBuffer = new StringBuffer();
-                stringBuffer.append("ALTER TABLE ");
-                stringBuffer.append(tableName);
-                stringBuffer.append(" ADD PRIMARY KEY ");
-                stringBuffer.append("(");
+        if (tableRs.next()) {
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append("ALTER TABLE ");
+            stringBuffer.append(tableName);
+            stringBuffer.append(" ADD PRIMARY KEY ");
+            stringBuffer.append("(");
 
-                List<Map<String, Object>> columnsList = (List<Map<String, Object>>) tablesMap.get(tableName);
-                int pk_index = 0;
+            List<Map<String, Object>> columnsList = (List<Map<String, Object>>) tablesMap.get(tableName);
+            int pk_index = 0;
 
-                String catalog = tableRs.getString("TABLE_CAT");
-                String schema = tableRs.getString("TABLE_SCHEM");
-                DebugWrapper.logDebug("Table: " + tableName, className);
-                ResultSet primaryKeys = metadata.getPrimaryKeys(catalog, schema, tableName);
-                List<String> pk_list = new ArrayList();
-                while (primaryKeys.next()) {
-                    DebugWrapper.logDebug("Primary key: " + primaryKeys.getString("COLUMN_NAME"), className);
-                    pk_list.add(primaryKeys.getString("COLUMN_NAME"));
-                }
+            String catalog = tableRs.getString("TABLE_CAT");
+            String schema = tableRs.getString("TABLE_SCHEM");
+            DebugWrapper.logDebug("Table: " + tableName, className);
+            ResultSet primaryKeys = metadata.getPrimaryKeys(catalog, schema, tableName);
+            List<String> pk_list = new ArrayList();
+            while (primaryKeys.next()) {
+                DebugWrapper.logDebug("Primary key: " + primaryKeys.getString("COLUMN_NAME"), className);
+                pk_list.add(primaryKeys.getString("COLUMN_NAME"));
+            }
 
-                //TODO: Need to improve the code to update primary key.
-                Boolean dropPrimaryKey = false;
-                for (Map<String, Object> column : columnsList) {
-                    if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
-                        if (!column.containsKey("nullable") || !("false").equalsIgnoreCase((String) column.get("nullable"))) {
-                            DebugWrapper.logDebug("Can't Update Primary Key for table " + tableName + " Column " + column.get("name") + " is not nullable", className);
-                            break;
-                        }
-                        if (!pk_list.isEmpty()) {
-                            if (!pk_list.contains((String) column.get("name"))) {
-                                dropPrimaryKey = true;
-                                break;
-                            }
-                        }
-                    } else if (!pk_list.isEmpty() && pk_list.contains((String) column.get("name"))) {
-                        dropPrimaryKey = true;
+            //TODO: Need to improve the code to update primary key.
+            Boolean dropPrimaryKey = false;
+            for (Map<String, Object> column : columnsList) {
+                if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
+                    if (!column.containsKey("nullable") || !("false").equalsIgnoreCase((String) column.get("nullable"))) {
+                        DebugWrapper.logDebug("Can't Update Primary Key for table " + tableName + " Column " + column.get("name") + " is not nullable", className);
                         break;
                     }
-                }
-                if (dropPrimaryKey) {
-                    queryList.add("ALTER TABLE " + tableName + " DROP PRIMARY KEY");
-                    for (Map<String, Object> column : columnsList) {
-                        if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
-                            if (pk_index > 0) {
-                                stringBuffer.append(",");
-                            }
-                            stringBuffer.append(column.get("name"));
-                            pk_index++;
-                            DebugWrapper.logDebug("===column==="+column, className);
+                    if (!pk_list.isEmpty()) {
+                        if (!pk_list.contains((String) column.get("name"))) {
+                            dropPrimaryKey = true;
+                            break;
                         }
                     }
+                } else if (!pk_list.isEmpty() && pk_list.contains((String) column.get("name"))) {
+                    dropPrimaryKey = true;
+                    break;
                 }
-                stringBuffer.append(");");
-                if (pk_index > 0) {
-                    DebugWrapper.logDebug("ADDING PRIMARY KEY CONSTRAINT ON TABLE: "+tableName, className);
-                    DebugWrapper.logDebug("====stringBuffer==="+stringBuffer, className);
-                    queryList.add(stringBuffer.toString());
+            }
+            if (dropPrimaryKey) {
+                queryList.add("ALTER TABLE " + tableName + " DROP PRIMARY KEY");
+                for (Map<String, Object> column : columnsList) {
+                    if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
+                        if (pk_index > 0) {
+                            stringBuffer.append(",");
+                        }
+                        stringBuffer.append(column.get("name"));
+                        pk_index++;
+                    }
                 }
+            } else if (pk_list.isEmpty()) {
+                for (Map<String, Object> column : columnsList) {
+                    if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
+                        if (pk_index > 0) {
+                            stringBuffer.append(",");
+                        }
+                        stringBuffer.append(column.get("name"));
+                        pk_index++;
+                    }
+                }
+            }
+            stringBuffer.append(");");
+            if (pk_index > 0) {
+                DebugWrapper.logDebug("ADDING PRIMARY KEY CONSTRAINT ON TABLE: "+tableName, className);
+                queryList.add(stringBuffer.toString());
             }
         }
         queryMap.put("pk_constraint", queryList);
@@ -248,6 +253,7 @@ public class QueryGenerator {
 
                     if (("int").equalsIgnoreCase((String) columnMap.get("data-type"))) {
                         columnMap.put("data-type", "INTEGER");
+                        columnMap.put("column-size", "11"); //Integer column-size will always be 11
                     }
 
                     if (!rsDataType.equalsIgnoreCase((String) columnMap.get("data-type"))) {
@@ -257,7 +263,7 @@ public class QueryGenerator {
                     if (columnMap.containsKey("column-size") && (rsColumnSize != (Integer.parseInt((String) columnMap.get("column-size"))))
                             && (rsDataType.equalsIgnoreCase((String) columnMap.get("data-type")))) {
                         if (!("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
-                            alterList.add(" " + (String) columnMap.get("column-size"));
+                            alterList.add(columnMap.get("data-type") + " (" + columnMap.get("column-size") + ") ");
                         }
                     }
                     if(columnMap.containsKey("nullable") && (isNullable != (Boolean.parseBoolean((String) columnMap.get("nullable")))) && !("true".equalsIgnoreCase((String) columnMap.get("auto-increment")))) {
@@ -271,7 +277,17 @@ public class QueryGenerator {
                         } else {
                             alterList.add(" NULL");
                         }
+                    } else if (!columnMap.containsKey("nullable")) {
+                        if (!isNullable) {
+                            if (!("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                                alterList.add((String) columnMap.get("data-type") + " (" + columnMap.get("column-size") + ") ");
+                            } else if (("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
+                                alterList.add((String) columnMap.get("data-type"));
+                            }
+                            alterList.add(" NULL");
+                        }
                     }
+
                     if (columnMap.containsKey("auto-increment") && (("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type")))
                             && (rsIsAutoIncrement != (Boolean.parseBoolean((String) columnMap.get("auto-increment")))) && ("true".equalsIgnoreCase((String) columnMap.get("auto-increment")))) {
                         if (!("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
@@ -329,6 +345,14 @@ public class QueryGenerator {
                     }
                     queryList.add(stringBuffer.toString());
                 }
+            }
+            Map<String, Object> pk_result = createPrimaryKeyConstraint(tableName);
+            if (pk_result.containsKey("error")) {
+                queryMap.put("error", "error");
+            }
+            List<String> pkList = (List<String>) pk_result.get("pk_constraint");
+            for (String pkString : pkList) {
+                queryList.add(pkString);
             }
         }
 
