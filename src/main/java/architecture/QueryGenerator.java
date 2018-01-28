@@ -44,17 +44,16 @@ public class QueryGenerator {
 
     protected Map<String, Object> createTableQueries() throws SQLException {
 
+        if (tablesMap.isEmpty()) {
+            Utility.returnError();
+        }
+
         DatabaseMetaData metadata = null;
         metadata = conn.getMetaData();
 
         ResultSet resultSet;
         Map<String, Object> queryMap = new HashMap<String, Object>();
         List<String> queryList = new ArrayList<String>();
-
-        if (tablesMap.isEmpty()) {
-            queryMap.put("error", "error");
-            return queryMap;
-        }
 
         for (Map.Entry<String, Object> table : tablesMap.entrySet()) {
             String tableName = table.getKey();
@@ -69,6 +68,10 @@ public class QueryGenerator {
                 List<Map<String, Object>> columnsList = (List<Map<String, Object>>) tablesMap.get(tableName);
                 int column_index = 0;
                 for (Map<String, Object> column : columnsList) {
+                    Map<String, Object> validate_result = validateColumns(column);
+                    if (!("success").equalsIgnoreCase((String) validate_result.get("status"))) {
+                        return Utility.returnError();
+                    }
                     stringBuffer.append(column.get("name"));
                     stringBuffer.append(" " + column.get("data-type"));
                     if (!("int").equalsIgnoreCase((String) column.get("data-type"))) {
@@ -124,17 +127,17 @@ public class QueryGenerator {
     }
 
     protected Map<String, Object> createPrimaryKeyConstraint(String tableName) throws SQLException {
+
+        if (tableName == null || tableName.length() <= 0) {
+            Utility.returnError();
+        }
+
         DatabaseMetaData metadata = null;
         metadata = conn.getMetaData();
 
         ResultSet resultSet;
         Map<String, Object> queryMap = new HashMap<String, Object>();
         List<String> queryList = new ArrayList<String>();
-
-        if (tableName == null) {
-            queryMap.put("error", "error");
-            return queryMap;
-        }
 
         ResultSet tableRs = metadata.getTables(null, null, tableName, null);
 
@@ -150,11 +153,9 @@ public class QueryGenerator {
 
             String catalog = tableRs.getString("TABLE_CAT");
             String schema = tableRs.getString("TABLE_SCHEM");
-            DebugWrapper.logDebug("Table: " + tableName, className);
             ResultSet primaryKeys = metadata.getPrimaryKeys(catalog, schema, tableName);
             List<String> pk_list = new ArrayList();
             while (primaryKeys.next()) {
-                DebugWrapper.logDebug("Primary key: " + primaryKeys.getString("COLUMN_NAME"), className);
                 pk_list.add(primaryKeys.getString("COLUMN_NAME"));
             }
 
@@ -201,7 +202,7 @@ public class QueryGenerator {
             }
             stringBuffer.append(");");
             if (pk_index > 0) {
-                DebugWrapper.logDebug("ADDING PRIMARY KEY CONSTRAINT ON TABLE: "+tableName, className);
+                DebugWrapper.logDebug("Adding Primary Key Constraint on Table: "+tableName, className);
                 queryList.add(stringBuffer.toString());
             }
         }
@@ -211,6 +212,10 @@ public class QueryGenerator {
 
     protected Map<String, Object> updateColumn() throws SQLException {
 
+        if (tablesMap.isEmpty()) {
+            Utility.returnError();
+        }
+
         DatabaseMetaData metadata = null;
         metadata = conn.getMetaData();
         List<String> alterList = new ArrayList<>();
@@ -218,11 +223,6 @@ public class QueryGenerator {
         ResultSet resultSet;
         Map<String, Object> queryMap = new HashMap<String, Object>();
         List<String> queryList = new ArrayList<String>();
-
-        if (tablesMap.isEmpty()) {
-            queryMap.put("error", "error");
-            return queryMap;
-        }
 
         for (Map.Entry<String, Object> table : tablesMap.entrySet()) {
             String tableName = table.getKey();
@@ -240,6 +240,10 @@ public class QueryGenerator {
             }
 
             for (Map<String, Object> columnMap : tableList) {
+                Map<String, Object> validate_result = validateColumns(columnMap);
+                if (!("success").equalsIgnoreCase((String) validate_result.get("status"))) {
+                    return Utility.returnError();
+                }
                 alterList.clear();
                 String columnName = (String) columnMap.get("name");
                 columnRs = metadata.getColumns(null, null, tableName, columnName);
@@ -306,6 +310,7 @@ public class QueryGenerator {
                         if (!"INTEGER".equalsIgnoreCase((String) columnMap.get("data-type"))) {
                             stringBuffer.append(" (" + columnMap.get("column-size") + ") ");
                         }
+                        DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
                         queryList.add(stringBuffer.toString());
                     } else if (columnMap.containsKey("auto-increment") && ("false".equalsIgnoreCase((String) columnMap.get("auto-increment")))
                                 && rsIsAutoIncrement != (Boolean.parseBoolean((String) columnMap.get("auto-increment")))) {
@@ -317,6 +322,7 @@ public class QueryGenerator {
                         if (!"INTEGER".equalsIgnoreCase((String) columnMap.get("data-type"))) {
                             stringBuffer.append(" (" + columnMap.get("column-size") + ") ");
                         }
+                        DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
                         queryList.add(stringBuffer.toString());
                     }
                     if (!alterList.isEmpty()) {
@@ -326,6 +332,7 @@ public class QueryGenerator {
                         for (String alterQuery : alterList) {
                             stringBuffer.append(" " + alterQuery);
                         }
+                        DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
                         queryList.add(stringBuffer.toString());
                     }
                 } else if (!columnRs.next()){
@@ -343,12 +350,13 @@ public class QueryGenerator {
                             && "true".equalsIgnoreCase((String) columnMap.get("auto-increment"))) {
                         stringBuffer.append(" AUTO_INCREMENT");
                     }
+                    DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
                     queryList.add(stringBuffer.toString());
                 }
             }
             Map<String, Object> pk_result = createPrimaryKeyConstraint(tableName);
             if (pk_result.containsKey("error")) {
-                queryMap.put("error", "error");
+                queryMap.put("status", "error");
             }
             List<String> pkList = (List<String>) pk_result.get("pk_constraint");
             for (String pkString : pkList) {
@@ -374,5 +382,23 @@ public class QueryGenerator {
         } else {
             return true;
         }
+    }
+
+    private Map<String, Object> validateColumns(Map<String, Object> column) {
+        if (!column.containsKey("name") || !column.containsKey("data-type")) {
+            return Utility.returnError();
+        }
+        String name = (String) column.get("name");
+        String data_type = (String) column.get("data-type");
+
+        if (name == null || name.length() <= 0) {
+            return Utility.returnError();
+        }
+
+        if (data_type == null || data_type.length() <= 0) {
+            return Utility.returnError();
+        }
+
+        return Utility.returnSuccess();
     }
 }

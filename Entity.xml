@@ -34,7 +34,7 @@
         <column name="TestColumn2" data-type="int" nullable="false"/>
         <column name="TestColumn3" data-type="varchar" column-size="3"/>
         <column name="TestColumn4" data-type="varchar" column-size="4"/>
-        <column name="TestColumn5" data-type="varchar" column-size="5" nullable="false"/>
+        <column name="TestColumn5" data-type="int" column-size="5" nullable="false"/>
         <column name="TestColumn7" data-type="int" nullable="false" primary-key="true"/>
     </table>
     <table name="TestEntityReader2">

@@ -31,4 +31,15 @@ public class Utility {
         return isAvailable;
     }
 
+    public static Map<String, Object> returnSuccess() {
+        Map<String, Object> successMap = new HashMap<String, Object>();
+        successMap.put("status", "success");
+        return successMap;
+    }
+
+    public static Map<String, Object> returnError() {
+        Map<String, Object> errorMap = new HashMap<String, Object>();
+        errorMap.put("status", "error");
+        return errorMap;
+    }
 }

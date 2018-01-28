@@ -35,21 +35,24 @@ public class NextEngine {
             Map<String, Object> updateColumnQueries = queryGenerator.updateColumn();
 
             stmt = conn.createStatement();
-            if (!("error").equalsIgnoreCase((String) createTableQueries.get("error"))) {
+            if (!("error").equalsIgnoreCase((String) createTableQueries.get("status"))) {
                 for (String createTableQuery : (List<String>) createTableQueries.get("create_table")) {
                     stmt.addBatch(createTableQuery);
                 }
+            } else {
+                DebugWrapper.logDebug("Unable to create table(s). Bad Table(s) Definition", className);
             }
-            if (!("error").equalsIgnoreCase((String) dropTableQueries.get("error"))) {
+            if (!("error").equalsIgnoreCase((String) dropTableQueries.get("status"))) {
                 for (String dropTableQuery : (List<String>) dropTableQueries.get("drop_table")) {
                     stmt.addBatch(dropTableQuery);
                 }
             }
-            if (!("error").equalsIgnoreCase((String) updateColumnQueries.get("error"))) {
+            if (!("error").equalsIgnoreCase((String) updateColumnQueries.get("status"))) {
                 for (String updateColumnQuery : (List<String>) updateColumnQueries.get("update_column")) {
-                    DebugWrapper.logDebug("====updateColumnQuery==="+updateColumnQuery, className);
                     stmt.addBatch(updateColumnQuery);
                 }
+            } else {
+                DebugWrapper.logDebug("Unable to update Column(s), Bad Column(s) definition.", className);
             }
             DebugWrapper.logDebug("Executing Query Batch", className);
             int[] totalBatches = stmt.executeBatch();//executing the batch
