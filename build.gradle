@@ -69,7 +69,7 @@ buildscript {
 
 tomcat {
     contextPath = "/";
-    tomcatRun.configFile = file("src/main/java/configs/nextrr-context.xml")
+    tomcatRun.configFile = file("src/main/java/configs/orm-context.xml")
 }
 
 task wrapper(type: Wrapper) {
