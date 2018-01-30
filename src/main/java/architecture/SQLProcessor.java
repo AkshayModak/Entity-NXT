@@ -20,7 +20,7 @@ public class SQLProcessor {
         DB_URL = "jdbc:mysql://" + HOST + "/" + DATABASE_NAME;
     }
 
-    protected Map<String, Object> loadDriver() {
+    public Map<String, Object> loadDriver() {
         Map<String, Object> successMessage = DefaultObjects.getSuccessMap();
 
         String fileName = nextrr_home + "setup.xml";

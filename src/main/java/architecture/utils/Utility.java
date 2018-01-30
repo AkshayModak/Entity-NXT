@@ -6,19 +6,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 public class Utility {
 
-    /*public static Boolean hasMapKeyValuePair(Map<String, Object> paramMap, String key, String value) {
-        Boolean isAvailable = false;
-        for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
-            if ((key).equalsIgnoreCase(entry.getKey()) && (value).equalsIgnoreCase(entry.getValue().toString())) {
-                System.out.println("===value==="+entry.getValue());
-                isAvailable = true;
-            }
-        }
-        return isAvailable;
-    }*/
     public static Boolean hasMapKeyValuePair(List<Map<String, Object>> paramList, String key, String value) {
         Boolean isAvailable = false;
         for (Map<String, Object> paramMap : paramList) {
@@ -41,5 +32,47 @@ public class Utility {
         Map<String, Object> errorMap = new HashMap<String, Object>();
         errorMap.put("status", "error");
         return errorMap;
+    }
+
+    public static String listToCommaSeperatedString(List<String> list) {
+        return String.join(",", list);
+    }
+
+    public static List<String> getListFromCommaSeparatedString(String text) {
+        if (text != null && text != "") {
+            List<String> result = null;
+            if (text.contains(",")) {
+                result = Arrays.asList(text.split("\\s*,\\s*"));
+            } else {
+                List<String> tempList = new ArrayList<>();
+                tempList.add(text);
+                result = tempList;
+            }
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    public static String escapeMetaCharacters(String inputString) {
+        final String[] metaCharacters = { "'" };
+        String outputString = "";
+        for (int i = 0; i < metaCharacters.length; i++) {
+            if (inputString.contains(metaCharacters[i])) {
+                outputString = inputString.replace(metaCharacters[i], "\\" + metaCharacters[i]);
+                inputString = outputString;
+                return outputString;
+            }
+        }
+        return inputString;
+    }
+
+    public static Object getFirstFromList(Map<String, Object> map) {
+        List resultList = (List) map.get("result");
+        if (!map.isEmpty()) {
+            Map<String, Object> resultMap = (Map<String, Object>) resultList.get(0);
+            return resultMap;
+        }
+        return returnError();
     }
 }

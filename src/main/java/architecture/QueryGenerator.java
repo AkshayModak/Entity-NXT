@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 import java.lang.reflect.Field;
 
@@ -20,6 +21,10 @@ public class QueryGenerator {
     private Map<String, Object> tablesMap = new HashMap<String, Object>();
     public static final String className = QueryGenerator.class.getName();
     private Connection conn = null;
+
+    public QueryGenerator() {
+
+    }
 
     public QueryGenerator(Map<String, Object> tablesMap, Connection conn) {
         this.tablesMap = tablesMap;
@@ -366,6 +371,112 @@ public class QueryGenerator {
 
         queryMap.put("update_column", queryList);
         return queryMap;
+    }
+
+    public String setSelectQuery(String entity, Map<String, Object> queryParams) {
+
+        String conditions = "";
+        String sqlQuery = null;
+
+        if (queryParams != null && !queryParams.isEmpty()) {
+            Iterator<Map.Entry<String, Object>> entries = queryParams.entrySet().iterator();
+
+            while (entries.hasNext()) {
+                Map.Entry<String, Object> entry = entries.next();
+                conditions += " " + entry.getKey() + "='" + entry.getValue() + "'";
+                if (entries.hasNext()) {
+                    conditions = conditions + " AND";
+                }
+            }
+            sqlQuery = "SELECT * FROM " + entity + " WHERE" + conditions + ";";
+        } else {
+            sqlQuery = "SELECT * FROM " + entity + ";";
+        }
+
+        return sqlQuery;
+    }
+
+    public String setInsertQuery(String entity, Map<String, Object> queryParams) {
+
+        Iterator<Map.Entry<String, Object>> columnEntries = queryParams.entrySet().iterator();
+
+        StringBuffer columnNames = new StringBuffer();
+        while (columnEntries.hasNext()) {
+            Map.Entry<String, Object> entry = columnEntries.next();
+            columnNames.append(columnNames + entry.getKey());
+            if (columnEntries.hasNext()) {
+                columnNames.append(columnNames + ", ");
+            } else {
+                columnNames.append(columnNames + " ");
+            }
+        }
+
+        Iterator<Map.Entry<String, Object>> valueEntries = queryParams.entrySet().iterator();
+        StringBuffer values = new StringBuffer();
+
+        while (valueEntries.hasNext()) {
+            Map.Entry<String, Object> entry = valueEntries.next();
+            values.append(values + "\"" + (String) queryParams.get(entry.getKey()) + "\"");
+            if (valueEntries.hasNext()) {
+                values.append(values + ", ");
+            } else {
+                values.append(values + " ");
+            }
+        }
+
+        String sqlQuery = "INSERT INTO " + entity + "(" + columnNames.toString() + ") VALUES (" + values.toString() + ");";
+        return sqlQuery;
+    }
+
+    public String setUpdateQuery(String entity, Map<String, Object> queryParams, Map<String, Object> primaryKeyParams) {
+
+        Iterator<Map.Entry<String, Object>> columnEntries = queryParams.entrySet().iterator();
+
+        StringBuffer columnNames = new StringBuffer();
+        while (columnEntries.hasNext()) {
+            Map.Entry<String, Object> entry = columnEntries.next();
+            columnNames.append(entry.getKey() + " = '" + Utility.escapeMetaCharacters((String) entry.getValue()) + "'");
+            if (columnEntries.hasNext()) {
+                columnNames.append(columnNames + ", ");
+            } else {
+                columnNames.append(columnNames + " ");
+            }
+        }
+
+        Iterator<Map.Entry<String, Object>> primaryKeysEntries = primaryKeyParams.entrySet().iterator();
+
+        StringBuffer primaryKeys = new StringBuffer();
+        while (primaryKeysEntries.hasNext()) {
+            Map.Entry<String, Object> entry = primaryKeysEntries.next();
+            primaryKeys.append(entry.getKey() + " = '" + Utility.escapeMetaCharacters((String) entry.getValue()) + "'");
+            if (columnEntries.hasNext()) {
+                primaryKeys.append(primaryKeys + " AND ");
+            } else {
+                primaryKeys.append(primaryKeys);
+            }
+        }
+
+        String sqlQuery = "UPDATE " + entity + " SET " + columnNames.toString() + " WHERE " + primaryKeys.toString() + "';";
+        return sqlQuery;
+    }
+
+    public String setDeleteQuery(String entity, Map<String, Object> queryParams) {
+
+        Iterator<Map.Entry<String, Object>> primaryKeysEntries = queryParams.entrySet().iterator();
+
+        StringBuffer primaryKeys = new StringBuffer();
+        while (primaryKeysEntries.hasNext()) {
+            Map.Entry<String, Object> entry = primaryKeysEntries.next();
+            primaryKeys.append(entry.getKey() + " = '" + Utility.escapeMetaCharacters((String) entry.getValue()) + "'");
+            if (primaryKeysEntries.hasNext()) {
+                primaryKeys.append(primaryKeys + " AND ");
+            } else {
+                primaryKeys.append(primaryKeys);
+            }
+        }
+
+        String sqlQuery = "DELETE FROM " + entity + " WHERE " + primaryKeys.toString();
+        return sqlQuery;
     }
 
     private Boolean isNullable(String value) {
