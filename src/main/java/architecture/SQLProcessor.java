@@ -25,10 +25,6 @@ public class SQLProcessor {
     public final String className = SQLProcessor.class.getName();
     private String nextrr_home = System.getProperty("user.dir") + "/";
 
-    public SQLProcessor() {
-        loadDriver();
-    }
-
     private void setDBUrl() {
         DB_URL = "jdbc:mysql://" + HOST + "/" + DATABASE_NAME;
     }
@@ -61,18 +57,28 @@ public class SQLProcessor {
         List<Map<String, Object>> resultList = new ArrayList<>();
         Statement statement = null;
         try {
+            loadDriver();
             statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery(query);
-            // STEP 5: Extract data from result set
-            while (rs.next()) {
-                Map<String, Object> rowMap = new HashMap<String, Object>();
-                ResultSetMetaData row = rs.getMetaData();
-                for (int rows = 1; rows <= row.getColumnCount(); rows++) {
-                    rowMap.put(row.getColumnName(rows), rs.getString(rows));
+            Boolean isResultSet = statement.execute(query);
+            //Reference: https://stackoverflow.com/questions/35544167/mysql-a-way-to-check-if-query-is-update-delete-create-or-select
+            if (isResultSet) {
+                try (ResultSet rs = statement.getResultSet()) {
+                    while (rs.next()) {
+                        Map<String, Object> rowMap = new HashMap<String, Object>();
+                        ResultSetMetaData row = rs.getMetaData();
+                        for (int rows = 1; rows <= row.getColumnCount(); rows++) {
+                            rowMap.put(row.getColumnName(rows), rs.getString(rows));
+                        }
+                        resultList.add(rowMap);
+                    }
+                    rs.close();
+                } catch (SQLException se) {
+
                 }
-                resultList.add(rowMap);
+            } else {
+                DebugWrapper.logDebug("Custom Query Finished Running Successfully", className);
             }
-            rs.close();
+            conn.commit();
             conn.close();
         } catch (SQLException se) {
             // Handle errors for JDBC
@@ -99,7 +105,13 @@ public class SQLProcessor {
         return resultList;
     }
 
+    public List<Map<String, Object>> runCustomQuery(String query) {
+        loadDriver();
+        return runQuery(query);
+    }
+
     public Connection getConnection() {
+        loadDriver();
         return conn;
     }
 }

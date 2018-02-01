@@ -96,18 +96,27 @@ public class NextEngine {
         updateMap.put("TestColumn5", "Value 6");
 
         String updateResult = queryGenerator.setUpdateQuery("TestEntityReader", map, updateMap);
-        DebugWrapper.logDebug("====updateResult===="+updateResult, className);
+        DebugWrapper.logDebug("Update Query: "+updateResult, className);
 
         String deleteResult = queryGenerator.setDeleteQuery("TestEntityReader", updateMap);
-        DebugWrapper.logDebug("====deleteResult===="+deleteResult, className);
+        DebugWrapper.logDebug("Delete Query: "+deleteResult, className);
 
         String selectResult = queryGenerator.setSelectQuery("TestEntityReader", updateMap);
-        DebugWrapper.logDebug("====selectResult===="+selectResult, className);
+        DebugWrapper.logDebug("Select Query: "+selectResult, className);
         SQLProcessor sqlProcessor = new SQLProcessor();
         List<Map<String, Object>> resultList = sqlProcessor.runQuery(selectResult);
         for (Map<String, Object> resultMap : resultList) {
-            DebugWrapper.logDebug("====resultMap========"+resultMap, className);
+            DebugWrapper.logDebug("Select Query Result(s): "+resultMap, className);
         }
 
+        List<Map<String, Object>> customResult = sqlProcessor.runCustomQuery("DELETE FROM TestEntityReader WHERE TestColumn5 = 'Value 6' AND TestColumn2 = '2' AND TestColumn3 = '3' AND TestColumn1 = '1' AND Id = '0'");
+        for (Map<String, Object> resultMap : customResult) {
+            DebugWrapper.logDebug("Custom Select Query Result(s): "+resultMap, className);
+        }
+
+        resultList = sqlProcessor.runQuery(selectResult);
+        for (Map<String, Object> resultMap : resultList) {
+            DebugWrapper.logDebug("Select Query Result(s): "+resultMap, className);
+        }
     }
 }
