@@ -75,4 +75,8 @@ public class Utility {
         }
         return returnError();
     }
+
+    public static Map<String, Object> getMap() {
+        return new HashMap<String, Object>();
+    }
 }

@@ -400,31 +400,33 @@ public class QueryGenerator {
 
         Iterator<Map.Entry<String, Object>> columnEntries = queryParams.entrySet().iterator();
 
-        StringBuffer columnNames = new StringBuffer();
+        String columnNames = "";
         while (columnEntries.hasNext()) {
             Map.Entry<String, Object> entry = columnEntries.next();
-            columnNames.append(columnNames + entry.getKey());
+            columnNames = columnNames + entry.getKey();
             if (columnEntries.hasNext()) {
-                columnNames.append(columnNames + ", ");
+                columnNames = columnNames + ", ";
             } else {
-                columnNames.append(columnNames + " ");
+                columnNames = columnNames + " ";
             }
         }
 
+        DebugWrapper.logDebug("====columnNames===="+columnNames, className);
+
         Iterator<Map.Entry<String, Object>> valueEntries = queryParams.entrySet().iterator();
-        StringBuffer values = new StringBuffer();
+        String values = "";
 
         while (valueEntries.hasNext()) {
             Map.Entry<String, Object> entry = valueEntries.next();
-            values.append(values + "\"" + (String) queryParams.get(entry.getKey()) + "\"");
+            values = values + "\"" + (String) queryParams.get(entry.getKey()) + "\"";
             if (valueEntries.hasNext()) {
-                values.append(values + ", ");
+                values = values + ", ";
             } else {
-                values.append(values + " ");
+                values = values + " ";
             }
         }
 
-        String sqlQuery = "INSERT INTO " + entity + "(" + columnNames.toString() + ") VALUES (" + values.toString() + ");";
+        String sqlQuery = "INSERT INTO " + entity + "(" + columnNames + ") VALUES (" + values + ");";
         return sqlQuery;
     }
 
@@ -432,31 +434,31 @@ public class QueryGenerator {
 
         Iterator<Map.Entry<String, Object>> columnEntries = queryParams.entrySet().iterator();
 
-        StringBuffer columnNames = new StringBuffer();
+        String columnNames = " ";
         while (columnEntries.hasNext()) {
             Map.Entry<String, Object> entry = columnEntries.next();
-            columnNames.append(entry.getKey() + " = '" + Utility.escapeMetaCharacters((String) entry.getValue()) + "'");
+            String columnName = entry.getKey() + " = '" + Utility.escapeMetaCharacters((String) entry.getValue()) + "'";
             if (columnEntries.hasNext()) {
-                columnNames.append(columnNames + ", ");
+                columnNames = columnNames + columnName + ", ";
             } else {
-                columnNames.append(columnNames + " ");
+                columnNames = columnNames + columnName + " ";
             }
         }
 
         Iterator<Map.Entry<String, Object>> primaryKeysEntries = primaryKeyParams.entrySet().iterator();
 
-        StringBuffer primaryKeys = new StringBuffer();
+        String primaryKeys = " ";
         while (primaryKeysEntries.hasNext()) {
             Map.Entry<String, Object> entry = primaryKeysEntries.next();
-            primaryKeys.append(entry.getKey() + " = '" + Utility.escapeMetaCharacters((String) entry.getValue()) + "'");
-            if (columnEntries.hasNext()) {
-                primaryKeys.append(primaryKeys + " AND ");
+            String primaryKey = entry.getKey() + " = '" + Utility.escapeMetaCharacters((String) entry.getValue()) + "'";
+            if (primaryKeysEntries.hasNext()) {
+                primaryKeys = primaryKeys + primaryKey + " AND ";
             } else {
-                primaryKeys.append(primaryKeys);
+                primaryKeys = primaryKeys + primaryKey;
             }
         }
 
-        String sqlQuery = "UPDATE " + entity + " SET " + columnNames.toString() + " WHERE " + primaryKeys.toString() + "';";
+        String sqlQuery = "UPDATE " + entity + " SET " + columnNames + " WHERE " + primaryKeys + ";";
         return sqlQuery;
     }
 
@@ -464,14 +466,14 @@ public class QueryGenerator {
 
         Iterator<Map.Entry<String, Object>> primaryKeysEntries = queryParams.entrySet().iterator();
 
-        StringBuffer primaryKeys = new StringBuffer();
+        String primaryKeys = "";
         while (primaryKeysEntries.hasNext()) {
             Map.Entry<String, Object> entry = primaryKeysEntries.next();
-            primaryKeys.append(entry.getKey() + " = '" + Utility.escapeMetaCharacters((String) entry.getValue()) + "'");
+            primaryKeys = primaryKeys + entry.getKey() + " = '" + Utility.escapeMetaCharacters((String) entry.getValue()) + "'";
             if (primaryKeysEntries.hasNext()) {
-                primaryKeys.append(primaryKeys + " AND ");
+                primaryKeys = primaryKeys + " AND ";
             } else {
-                primaryKeys.append(primaryKeys);
+                primaryKeys = primaryKeys;
             }
         }
 

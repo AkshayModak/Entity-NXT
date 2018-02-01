@@ -23,8 +23,7 @@ public class NextEngine {
         Map<String, Object> entityDefinitionMap = red.getEntityDefinition();
 
         SQLProcessor processor = new SQLProcessor();
-        Map<String, Object> driverResult = processor.loadDriver();
-        Connection conn = (Connection) driverResult.get("connection");
+        Connection conn = processor.getConnection();
         Statement stmt = null;
 
         QueryGenerator queryGenerator = new QueryGenerator(entityDefinitionMap, conn);
@@ -54,6 +53,9 @@ public class NextEngine {
             } else {
                 DebugWrapper.logDebug("Unable to update Column(s), Bad Column(s) definition.", className);
             }
+
+            NextEngine nextEngine = new NextEngine();
+            nextEngine.runQuery();
             DebugWrapper.logDebug("Executing Query Batch", className);
             int[] totalBatches = stmt.executeBatch();//executing the batch
             DebugWrapper.logDebug("Total Records Updated: "+totalBatches.length, className);
@@ -65,5 +67,47 @@ public class NextEngine {
         }
 
         return "success";
+    }
+
+    private void runQuery() {
+        DebugWrapper.logDebug("========Inside runQuery======", className);
+        QueryGenerator queryGenerator = new QueryGenerator();
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("Id", "0");
+        map.put("TestColumn1", "1");
+        map.put("TestColumn2", "2");
+        map.put("TestColumn3", "3");
+        map.put("TestColumn4", "Value 5");
+        map.put("TestColumn5", "Value 6");
+        map.put("TestColumn7", "7");
+
+        String result = queryGenerator.setInsertQuery("TestEntityReader", map);
+        DebugWrapper.logDebug("====result===="+result, className);
+
+        map.clear();
+        map.put("Id", "8");
+        map.put("TestColumn1", "11");
+
+        Map<String, Object> updateMap = new HashMap<String, Object>();
+        updateMap.put("TestColumn1", "1");
+        updateMap.put("TestColumn2", "2");
+        updateMap.put("TestColumn3", "3");
+        updateMap.put("TestColumn5", "Value 6");
+
+        String updateResult = queryGenerator.setUpdateQuery("TestEntityReader", map, updateMap);
+        DebugWrapper.logDebug("====updateResult===="+updateResult, className);
+
+        String deleteResult = queryGenerator.setDeleteQuery("TestEntityReader", updateMap);
+        DebugWrapper.logDebug("====deleteResult===="+deleteResult, className);
+
+        String selectResult = queryGenerator.setSelectQuery("TestEntityReader", updateMap);
+        DebugWrapper.logDebug("====selectResult===="+selectResult, className);
+        SQLProcessor sqlProcessor = new SQLProcessor();
+        List<Map<String, Object>> resultList = sqlProcessor.runQuery(selectResult);
+        for (Map<String, Object> resultMap : resultList) {
+            DebugWrapper.logDebug("====resultMap========"+resultMap, className);
+        }
+
     }
 }

@@ -24,8 +24,8 @@
         <column name="TestColumn1" data-type="int" nullable="false" primary-key="true"/>
         <column name="TestColumn2" data-type="int" nullable="false" primary-key="true"/>
         <column name="TestColumn3" data-type="int" column-size="11" nullable="false" primary-key="true"/>
-        <column name="TestColumn4" data-type="varchar" column-size="8"/>
-        <column name="TestColumn5" data-type="varchar" column-size="5" nullable="false" primary-key="true"/>
+        <column name="TestColumn4" data-type="varchar" column-size="20"/>
+        <column name="TestColumn5" data-type="varchar" column-size="20" nullable="false" primary-key="true"/>
         <column name="TestColumn7" data-type="int" nullable="false"/>
     </table>
     <table name="TestEntityReader1">

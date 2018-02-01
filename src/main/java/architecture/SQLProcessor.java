@@ -2,9 +2,18 @@ package architecture;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+
 import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 import architecture.utils.DebugWrapper;
+import architecture.utils.Utility;
 import one.DefaultObjects;
 import one.ReadXMLFile;
 
@@ -16,11 +25,15 @@ public class SQLProcessor {
     public final String className = SQLProcessor.class.getName();
     private String nextrr_home = System.getProperty("user.dir") + "/";
 
+    public SQLProcessor() {
+        loadDriver();
+    }
+
     private void setDBUrl() {
         DB_URL = "jdbc:mysql://" + HOST + "/" + DATABASE_NAME;
     }
 
-    public Map<String, Object> loadDriver() {
+    public void loadDriver() {
         Map<String, Object> successMessage = DefaultObjects.getSuccessMap();
 
         String fileName = nextrr_home + "setup.xml";
@@ -41,9 +54,52 @@ public class SQLProcessor {
             DebugWrapper.logInfo("Connected database successfully...", className);
         } catch (Exception e) {
             DebugWrapper.logInfo("Error During Loading Driver" + e, className);
-            return DefaultObjects.getErrorMap(e);
         }
+    }
 
-        return successMessage;
+    public List<Map<String, Object>> runQuery(String query) {
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        Statement statement = null;
+        try {
+            statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery(query);
+            // STEP 5: Extract data from result set
+            while (rs.next()) {
+                Map<String, Object> rowMap = new HashMap<String, Object>();
+                ResultSetMetaData row = rs.getMetaData();
+                for (int rows = 1; rows <= row.getColumnCount(); rows++) {
+                    rowMap.put(row.getColumnName(rows), rs.getString(rows));
+                }
+                resultList.add(rowMap);
+            }
+            rs.close();
+            conn.close();
+        } catch (SQLException se) {
+            // Handle errors for JDBC
+            DebugWrapper.logError("SQL Exception -- " + se, className);
+        } catch (Exception e) {
+            // Handle errors for Class.forName
+            DebugWrapper.logError("Exception -- " + e, className);
+        } finally {
+            // finally block used to close resources
+            try {
+                if (statement != null)
+                    conn.close();
+            } catch (SQLException se) {
+                    DebugWrapper.logDebug("Nothing to Catch : Exception while closing connection." + se.getMessage(), className);
+            } // do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                DebugWrapper.logError("SQL Exception -- " + se, className);
+            } // end finally try
+        } // end try
+        DebugWrapper.logInfo("Data Fetched Successfully!!", className);
+        return resultList;
+    }
+
+    public Connection getConnection() {
+        return conn;
     }
 }

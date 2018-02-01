@@ -24,14 +24,12 @@ public class Entity {
     static String PASS;
     static String DATABASE_NAME;
     static String HOST;
-    String ENTITY;
 
     private static String nextrr_home = System.getProperty("user.dir") + "/";
 
     private void loadDriver() {
         SQLProcessor processor = new SQLProcessor();
-        Map<String, Object> loadDriver = processor.loadDriver();
-        Connection conn = (Connection) loadDriver.get("connection");
+        Connection conn = processor.getConnection();
     }
 
     public Map<String, Object> getDbData() {
@@ -128,22 +126,6 @@ public class Entity {
         setDbData();
     }
 
-    public Map<String, Object> getF1Schedule(String entityName, Map<String, Object> paramsMap) {
-        String fileName = nextrr_home + "setup.xml";
-        Map<String, Object> setupConfig = ReadXMLFile.getXMLData(fileName);
-        USER = (String) setupConfig.get("username");
-        PASS = (String) setupConfig.get("password");
-        DATABASE_NAME = (String) setupConfig.get("database-name");
-        HOST = (String) setupConfig.get("host");
-        ENTITY = entityName;
-
-        QueryGenerator queryGenerator = new QueryGenerator();
-        queryGenerator.setSelectQuery("DEMO", paramsMap);
-        Map<String, Object> result = getDbData();
-
-        return result;
-    }
-
     public Map<String, Object> getAllEntityData(String entityName) {
         String fileName = nextrr_home + "setup.xml";
         Map<String, Object> setupConfig = ReadXMLFile.getXMLData(fileName);
@@ -151,7 +133,6 @@ public class Entity {
         PASS = (String) setupConfig.get("password");
         DATABASE_NAME = (String) setupConfig.get("database-name");
         HOST = (String) setupConfig.get("host");
-        ENTITY = entityName;
 
         QueryGenerator queryGenerator = new QueryGenerator();
         queryGenerator.setSelectQuery("DEMO", null);
@@ -167,7 +148,6 @@ public class Entity {
         PASS = (String) setupConfig.get("password");
         DATABASE_NAME = (String) setupConfig.get("database-name");
         HOST = (String) setupConfig.get("host");
-        this.ENTITY = entityName;
 
         QueryGenerator queryGenerator = new QueryGenerator();
         queryGenerator.setSelectQuery("DEMO", queryParams);
@@ -193,7 +173,6 @@ public class Entity {
         PASS = (String) setupConfig.get("password");
         DATABASE_NAME = (String) setupConfig.get("database-name");
         HOST = (String) setupConfig.get("host");
-        ENTITY = entityName;
 
         QueryGenerator queryGenerator = new QueryGenerator();
         queryGenerator.setUpdateQuery("DEMO", queryMap, primaryKey);
@@ -207,7 +186,6 @@ public class Entity {
         PASS = (String) setupConfig.get("password");
         DATABASE_NAME = (String) setupConfig.get("database-name");
         HOST = (String) setupConfig.get("host");
-        ENTITY = entityName;
 
         QueryGenerator queryGenerator = new QueryGenerator();
         queryGenerator.setInsertQuery("DEMO", queryMap);
@@ -221,7 +199,6 @@ public class Entity {
         PASS = (String) setupConfig.get("password");
         DATABASE_NAME = (String) setupConfig.get("database-name");
         HOST = (String) setupConfig.get("host");
-        ENTITY = entityName;
 
         QueryGenerator queryGenerator = new QueryGenerator();
         queryGenerator.setDeleteQuery("DEMO", primaryKey);

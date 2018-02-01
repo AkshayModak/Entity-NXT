@@ -477,8 +477,7 @@ public class ReadEntityDefinition {
 
     public String createTable() {
         SQLProcessor processor = new SQLProcessor();
-        Map<String, Object> result = processor.loadDriver();
-        conn = (Connection) result.get("connection");
+        conn = processor.getConnection();
         Statement stmt = null;
         List<String> createQueries = getCreateQueries();
 
