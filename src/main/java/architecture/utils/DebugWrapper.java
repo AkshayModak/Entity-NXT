@@ -4,15 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
 
-import one.DefaultObjects;
-
-
 public class DebugWrapper {
 	
 	private static Logger logger = LogManager.getRootLogger();
 	
 	private static void log(String logMessage, Level level, String className) {
-		if (DefaultObjects.isNotEmpty(className)) {
+		if (Utility.isNotEmpty(className)) {
 			logger = LogManager.getLogger(className);
 		}
 		logger.log(level, logMessage);

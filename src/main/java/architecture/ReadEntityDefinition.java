@@ -25,8 +25,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import architecture.utils.DebugWrapper;
-import one.DefaultObjects;
-import one.ReadXMLFile;
+import architecture.ReadXMLFile;
 import architecture.utils.Utility;
 
 public class ReadEntityDefinition {
@@ -153,7 +152,7 @@ public class ReadEntityDefinition {
                             createQuery += " AUTO_INCREMENT";
                         }
 
-                        if (DefaultObjects.isNotEmpty(createQuery)) {
+                        if (Utility.isNotEmpty(createQuery)) {
                             createQueries.add(createQuery);
                         }
                     }
@@ -219,7 +218,7 @@ public class ReadEntityDefinition {
                                 alterQuery += " AUTO_INCREMENT";
                             }
 
-                            if (DefaultObjects.isNotEmpty(alterQuery)) {
+                            if (Utility.isNotEmpty(alterQuery)) {
                                 alterQueries.add(alterQuery);
                             }
                             if (!alterQueries.isEmpty()) {
@@ -313,7 +312,7 @@ public class ReadEntityDefinition {
                                         }
                                     }
 
-                                    if (DefaultObjects.isNotEmpty(column.get("null"))
+                                    if (Utility.isNotEmpty(column.get("null"))
                                             && "false".equals(column.get("null"))
                                             && (nullable.equalsIgnoreCase((String) column.get("null")))) {
                                         if (columnText) {
@@ -331,9 +330,9 @@ public class ReadEntityDefinition {
                                         }
                                     }
 
-                                    if ((DefaultObjects.isNotEmpty(column.get("auto-increment"))
+                                    if ((Utility.isNotEmpty(column.get("auto-increment"))
                                             && "true".equalsIgnoreCase((String) column.get("auto-increment")))
-                                            && (DefaultObjects.isNotEmpty(column.get("auto-increment"))
+                                            && (Utility.isNotEmpty(column.get("auto-increment"))
                                             && !autoIncrement
                                             .equalsIgnoreCase((String) column.get("auto-increment")))) {
                                         if (columnText) {
@@ -356,7 +355,7 @@ public class ReadEntityDefinition {
                                     while (columnRs.next()) {
                                         String pkColName = columnRs.getString("COLUMN_NAME");
                                         DebugWrapper.logDebug("====pkColName==="+pkColName, className);
-                                        if (DefaultObjects.isNotEmpty(column.get("primary-key"))
+                                        if (Utility.isNotEmpty(column.get("primary-key"))
                                                 && "true".equals(column.get("primary-key"))
                                                 && !pkColName.equalsIgnoreCase(columnName)) {
                                             if (columnText) {
@@ -373,15 +372,15 @@ public class ReadEntityDefinition {
                                             } else {
                                                 modifyQuery += " primary key";
                                             }
-                                        } else if (DefaultObjects.isEmpty(column.get("primary-key"))
+                                        } else if (Utility.isEmpty(column.get("primary-key"))
                                                 && pkColName.equalsIgnoreCase(columnName)
-                                                && DefaultObjects.isEmpty(column.get("auto-increment"))) {
+                                                && Utility.isEmpty(column.get("auto-increment"))) {
                                             /*String dropPrimaryKey = */
                                             DebugWrapper.logDebug("===Primary Key can be removed===", className);
                                         }
                                     }
 
-                                    if (DefaultObjects.isNotEmpty(modifyQuery)) {
+                                    if (Utility.isNotEmpty(modifyQuery)) {
                                         modifyQueries.add(modifyQuery);
                                     }
                                 }

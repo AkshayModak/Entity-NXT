@@ -79,4 +79,17 @@ public class Utility {
     public static Map<String, Object> getMap() {
         return new HashMap<String, Object>();
     }
+
+    public static Boolean isNotEmpty(Object objValue) {
+        String value = String.valueOf(objValue);
+        value = value.replaceAll("\\s+", "");
+        if ((value != null) && (value.length() > 0) && !(value.isEmpty()) && !(value.equals("null"))) {
+            return true;
+        }
+        return false;
+    }
+
+    public static Boolean isEmpty(Object objValue) {
+        return objValue == null;
+    }
 }

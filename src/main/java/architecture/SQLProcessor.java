@@ -14,8 +14,7 @@ import java.util.ArrayList;
 
 import architecture.utils.DebugWrapper;
 import architecture.utils.Utility;
-import one.DefaultObjects;
-import one.ReadXMLFile;
+import architecture.ReadXMLFile;
 
 public class SQLProcessor {
 
@@ -30,7 +29,6 @@ public class SQLProcessor {
     }
 
     public void loadDriver() {
-        Map<String, Object> successMessage = DefaultObjects.getSuccessMap();
 
         String fileName = nextrr_home + "setup.xml";
         Map<String, Object> setupConfig = ReadXMLFile.getXMLData(fileName);
@@ -46,7 +44,6 @@ public class SQLProcessor {
             DebugWrapper.logInfo("Connecting to " + DATABASE_NAME + " database...", className);
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
             conn.setAutoCommit(false);
-            successMessage.put("connection", conn);
             DebugWrapper.logInfo("Connected database successfully...", className);
         } catch (Exception e) {
             DebugWrapper.logInfo("Error During Loading Driver" + e, className);

@@ -4,7 +4,7 @@ import architecture.SQLProcessor;
 import architecture.utils.DebugWrapper;
 import architecture.QueryGenerator;
 import architecture.utils.Utility;
-import one.ReadXMLFile;
+import architecture.ReadXMLFile;
 
 import java.util.HashMap;
 import java.util.Iterator;
