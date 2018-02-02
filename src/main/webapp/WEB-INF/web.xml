@@ -1,67 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
-  <display-name>User Management</display-name>
-  <servlet>
-    <servlet-name>Jersey RESTful Application</servlet-name>
-    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-    <init-param>
-      <param-name>jersey.config.server.provider.packages</param-name>
-      <param-value>one, admin</param-value>
-    </init-param>
-    <init-param>  
-      <param-name>jersey.config.server.provider.classnames</param-name>  
-      <param-value>org.glassfish.jersey.filter.LoggingFilter;  
-       org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>  
-    </init-param>
-    <init-param>
-      <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
-      <param-value>true</param-value>
-    </init-param>
-  </servlet>
-  <servlet>
-    <servlet-name>FirstServlet</servlet-name>
-    <servlet-class>one.FirstServlet2</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>EntityServlet</servlet-name>
-    <servlet-class>architecture.EntityServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>Redirector</servlet-name>
-    <servlet-class>architecture.Redirector</servlet-class>
-  </servlet>
+  <display-name>Next ORM</display-name>
   <servlet>
     <servlet-name>NextEngine</servlet-name>
     <servlet-class>architecture.DriverServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>ShowData</servlet-name>
+    <servlet-class>com.next.demo.ShowData</servlet-class>
+  </servlet>
 
 
 
+
+  <servlet-mapping>
+    <servlet-name>ShowData</servlet-name>
+    <url-pattern>/showData</url-pattern>
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>NextEngine</servlet-name>
     <url-pattern>/run</url-pattern>
   </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>Jersey RESTful Application</servlet-name>
-    <url-pattern>/rest/*</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>FirstServlet</servlet-name>
-    <url-pattern>/first.html</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>Redirector</servlet-name>
-    <url-pattern>/home</url-pattern>
-    <url-pattern>/f1Schedule</url-pattern>
-    <url-pattern>/sports</url-pattern>
-    <url-pattern>/wallpapers</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>EntityServlet</servlet-name>
-    <url-pattern>/createEntities</url-pattern>
-  </servlet-mapping>
-  <login-config>
-   <auth-method>BASIC</auth-method>
-   <realm-name>Basic Authentication Example</realm-name>
-  </login-config>
 </web-app>
