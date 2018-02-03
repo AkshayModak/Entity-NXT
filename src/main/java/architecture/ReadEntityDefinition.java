@@ -53,7 +53,7 @@ public class ReadEntityDefinition {
         return (String) map.get(jdbcType);
     }
 
-    protected Map<String, Object> getEntityDefinition() {
+    public Map<String, Object> getEntityDefinition() {
 
         Map<String, Object> nodeResult = new HashMap<String, Object>();
         try {

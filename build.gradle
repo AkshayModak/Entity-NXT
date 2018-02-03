@@ -45,6 +45,9 @@ dependencies {
     providedCompile group: 'javax.servlet', name: 'servlet-api', version: '2.5'
     // https://mvnrepository.com/artifact/com.maxmind.geoip2/geoip2
     compile group: 'com.maxmind.geoip2', name: 'geoip2', version: '2.9.0'
+    // https://mvnrepository.com/artifact/javax.servlet/jstl
+    compile group: 'javax.servlet', name: 'jstl', version: '1.2'
+
 
 
 
