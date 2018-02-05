@@ -1,6 +1,5 @@
 <%@include file="header.jsp" %>
 
-<div class="container">
 
 	<div class="alert alert-info" role="alert">
     Search By Keyword functionality is WIP.
@@ -72,6 +71,5 @@
     </tbody>
 	</table>
 
-</div>
 
 <%@include file="footer.jsp" %>

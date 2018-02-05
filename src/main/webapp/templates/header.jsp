@@ -12,5 +12,14 @@
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="js/next.js"></script>
 	</head>
-  <body>
+	<c:choose>
+    <c:when test="${message != null && status != null}">
+      <body onload="showMessage(\'${status}\', \'${message}\')">==
+    </c:when>
+    <c:otherwise>
+        <body>
+    </c:otherwise>
+  </c:choose>
 	  <%@include file="navbar.jsp" %>
+	  <div class="container">
+	    <span id="result"></span>

@@ -15,5 +15,7 @@ public class DriverServlet extends HttpServlet {
         // Setting up the content type of web page
         NextEngine ne = new NextEngine();
         String result = ne.runEngine();
+
+        response.getWriter().write("Success Data");
     }
 }

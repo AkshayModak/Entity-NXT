@@ -17,7 +17,14 @@
     <servlet-name>GetRecords</servlet-name>
     <servlet-class>com.next.demo.GetRecords</servlet-class>
   </servlet>
-
+  <servlet>
+    <servlet-name>SQLEngine</servlet-name>
+    <jsp-file>/templates/sql-engine.jsp</jsp-file>
+  </servlet>
+  <servlet>
+    <servlet-name>CustomQuery</servlet-name>
+    <servlet-class>com.next.demo.CustomQuery</servlet-class>
+  </servlet>
 
 
   <servlet-mapping>
@@ -35,5 +42,13 @@
   <servlet-mapping>
     <servlet-name>GetRecords</servlet-name>
     <url-pattern>/getRecords</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>SQLEngine</servlet-name>
+    <url-pattern>/sql-engine</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>CustomQuery</servlet-name>
+    <url-pattern>/executeQuery</url-pattern>
   </servlet-mapping>
 </web-app>

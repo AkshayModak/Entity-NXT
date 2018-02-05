@@ -80,6 +80,12 @@ public class Utility {
         return new HashMap<String, Object>();
     }
 
+    public static Map<String, Object> getErrorMap() {
+        Map<String, Object> errorMap = new HashMap<String, Object>();
+        errorMap.put("status", "error");
+        return errorMap;
+    }
+
     public static Boolean isNotEmpty(Object objValue) {
         String value = String.valueOf(objValue);
         value = value.replaceAll("\\s+", "");

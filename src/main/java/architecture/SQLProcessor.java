@@ -70,7 +70,10 @@ public class SQLProcessor {
                     }
                     rs.close();
                 } catch (SQLException se) {
-
+                    Map<String, Object> errorMap = Utility.getErrorMap();
+                    errorMap.put("message", "SQL Exception -- " + se);
+                    resultList.add(errorMap);
+                    return resultList;
                 }
             } else {
                 DebugWrapper.logDebug("Custom Query Finished Running Successfully", className);
@@ -80,6 +83,10 @@ public class SQLProcessor {
         } catch (SQLException se) {
             // Handle errors for JDBC
             DebugWrapper.logError("SQL Exception -- " + se, className);
+            Map<String, Object> errorMap = Utility.getErrorMap();
+            errorMap.put("message", "SQL Exception -- " + se);
+            resultList.add(errorMap);
+            return resultList;
         } catch (Exception e) {
             // Handle errors for Class.forName
             DebugWrapper.logError("Exception -- " + e, className);
@@ -96,6 +103,10 @@ public class SQLProcessor {
                     conn.close();
             } catch (SQLException se) {
                 DebugWrapper.logError("SQL Exception -- " + se, className);
+                Map<String, Object> errorMap = Utility.getErrorMap();
+                errorMap.put("message", "SQL Exception -- " + se);
+                resultList.add(errorMap);
+                return resultList;
             } // end finally try
         } // end try
         DebugWrapper.logInfo("Data Fetched Successfully!!", className);
