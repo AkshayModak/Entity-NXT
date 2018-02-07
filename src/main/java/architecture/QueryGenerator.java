@@ -84,12 +84,6 @@ public class QueryGenerator {
                         stringBuffer.append(column.get("column-size"));
                         stringBuffer.append(")");
                     }
-                    if (column.containsKey("unique")) {
-                        stringBuffer.append(" UNIQUE");
-                    }
-                    if (column.containsKey("nullable") && ("false").equalsIgnoreCase((String) column.get("nullable"))) {
-                        stringBuffer.append(" NOT NULL");
-                    }
                     column_index++;
                     if (column_index < columnsList.size()) {
                         stringBuffer.append(", ");
@@ -188,7 +182,7 @@ public class QueryGenerator {
                 for (Map<String, Object> column : columnsList) {
                     if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
                         if (pk_index > 0) {
-                            stringBuffer.append(",");
+                            stringBuffer.append(", ");
                         }
                         stringBuffer.append(column.get("name"));
                         pk_index++;
@@ -198,7 +192,7 @@ public class QueryGenerator {
                 for (Map<String, Object> column : columnsList) {
                     if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
                         if (pk_index > 0) {
-                            stringBuffer.append(",");
+                            stringBuffer.append(", ");
                         }
                         stringBuffer.append(column.get("name"));
                         pk_index++;
@@ -313,7 +307,7 @@ public class QueryGenerator {
                         stringBuffer.append(" ADD COLUMN " + columnName);
                         stringBuffer.append(" " + columnMap.get("data-type"));
                         if (!"INTEGER".equalsIgnoreCase((String) columnMap.get("data-type"))) {
-                            stringBuffer.append(" (" + columnMap.get("column-size") + ") ");
+                            stringBuffer.append("(" + columnMap.get("column-size") + ") ");
                         }
                         DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
                         queryList.add(stringBuffer.toString());
@@ -323,9 +317,9 @@ public class QueryGenerator {
                         StringBuffer stringBuffer = new StringBuffer();
                         stringBuffer.append("ALTER TABLE " + tableName);
                         stringBuffer.append(" ADD COLUMN " + columnName);
-                        stringBuffer.append(" " + columnMap.get("data-type"));
+                        stringBuffer.append("" + columnMap.get("data-type"));
                         if (!"INTEGER".equalsIgnoreCase((String) columnMap.get("data-type"))) {
-                            stringBuffer.append(" (" + columnMap.get("column-size") + ") ");
+                            stringBuffer.append("(" + columnMap.get("column-size") + ") ");
                         }
                         DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
                         queryList.add(stringBuffer.toString());
@@ -346,7 +340,7 @@ public class QueryGenerator {
                     stringBuffer.append(" ADD COLUMN " + columnName);
                     stringBuffer.append(" " + columnMap.get("data-type"));
                     if (!"int".equalsIgnoreCase((String) columnMap.get("data-type"))) {
-                        stringBuffer.append(" (" + columnMap.get("column-size") + ") ");
+                        stringBuffer.append("(" + columnMap.get("column-size") + ") ");
                     }
                     if (columnMap.containsKey("nullable") && "false".equalsIgnoreCase((String) columnMap.get("nullable"))) {
                         stringBuffer.append(" NOT NULL");
@@ -478,6 +472,30 @@ public class QueryGenerator {
         }
 
         String sqlQuery = "DELETE FROM " + entity + " WHERE " + primaryKeys.toString();
+        return sqlQuery;
+    }
+
+    public String getSearchQuery(String entity, Map<String, String[]> queryParams) {
+        Iterator<Map.Entry<String, String[]>> searchEntries = queryParams.entrySet().iterator();
+
+        String searchKeywords = "";
+        while (searchEntries.hasNext()) {
+            Map.Entry<String, String[]> entry = searchEntries.next();
+            String keyword = entry.getValue()[0];
+            if (keyword.length() > 0) {
+                if ((searchKeywords != "")) {
+                    searchKeywords = searchKeywords + " AND ";
+                }
+                searchKeywords = searchKeywords + entry.getKey() + " LIKE ('%" + Utility.escapeMetaCharacters(keyword) + "%')";
+            }
+
+        }
+        String sqlQuery = "";
+        if (searchKeywords != "") {
+            sqlQuery = "SELECT * FROM " + entity + " WHERE " + searchKeywords;
+        } else {
+            sqlQuery = "error";
+        }
         return sqlQuery;
     }
 

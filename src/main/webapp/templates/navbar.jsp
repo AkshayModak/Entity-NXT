@@ -16,7 +16,7 @@
     </ul>
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
-				<button type="submit" class="btn btn-link nav-link">Next Engine</button>
+				<button type="submit" class="btn btn-link nav-link navbar-brand">Next Engine</button>
       </li>
     </ul>
     <ul class="navbar-nav">

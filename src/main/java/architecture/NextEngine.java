@@ -36,6 +36,7 @@ public class NextEngine {
             stmt = conn.createStatement();
             if (!("error").equalsIgnoreCase((String) createTableQueries.get("status"))) {
                 for (String createTableQuery : (List<String>) createTableQueries.get("create_table")) {
+                    DebugWrapper.logDebug("====createTableQuery===="+createTableQuery, className);
                     stmt.addBatch(createTableQuery);
                 }
             } else {
@@ -43,19 +44,21 @@ public class NextEngine {
             }
             if (!("error").equalsIgnoreCase((String) dropTableQueries.get("status"))) {
                 for (String dropTableQuery : (List<String>) dropTableQueries.get("drop_table")) {
+                    DebugWrapper.logDebug("====dropTableQuery===="+dropTableQuery, className);
                     stmt.addBatch(dropTableQuery);
                 }
             }
             if (!("error").equalsIgnoreCase((String) updateColumnQueries.get("status"))) {
                 for (String updateColumnQuery : (List<String>) updateColumnQueries.get("update_column")) {
+                    DebugWrapper.logDebug("====updateColumnQuery===="+updateColumnQuery, className);
                     stmt.addBatch(updateColumnQuery);
                 }
             } else {
                 DebugWrapper.logDebug("Unable to update Column(s), Bad Column(s) definition.", className);
             }
 
-            NextEngine nextEngine = new NextEngine();
-            nextEngine.runQuery();
+            /*NextEngine nextEngine = new NextEngine();
+            nextEngine.runQuery();*/
             DebugWrapper.logDebug("Executing Query Batch", className);
             int[] totalBatches = stmt.executeBatch();//executing the batch
             DebugWrapper.logDebug("Total Records Updated: "+totalBatches.length, className);
@@ -69,7 +72,7 @@ public class NextEngine {
         return "success";
     }
 
-    private void runQuery() {
+    /*private void runQuery() {
         DebugWrapper.logDebug("========Inside runQuery======", className);
         QueryGenerator queryGenerator = new QueryGenerator();
 
@@ -118,5 +121,5 @@ public class NextEngine {
         for (Map<String, Object> resultMap : resultList) {
             DebugWrapper.logDebug("Select Query Result(s): "+resultMap, className);
         }
-    }
+    }*/
 }

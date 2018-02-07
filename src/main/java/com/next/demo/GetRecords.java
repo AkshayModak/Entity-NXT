@@ -6,11 +6,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Collections;
+import java.util.ArrayList;
 
 import architecture.dashboard.Dashboard;
 import architecture.QueryGenerator;
 import architecture.SQLProcessor;
+import architecture.utils.Utility;
+
+import java.util.Iterator;
 
 public class GetRecords extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -18,7 +24,24 @@ public class GetRecords extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String tableName = request.getParameter("tableName");
         QueryGenerator queryGenerator = new QueryGenerator();
-        String query = queryGenerator.setSelectQuery(tableName, null);
+        Map<String, String[]> requestMap = new HashMap<>(request.getParameterMap());
+
+        List<String> keyList = new ArrayList<>();
+        keyList.add("tableName");
+        keyList.add("viewRecords");
+
+        Map<String, String[]> filteredRequestMap = Utility.removeKeyValueFromRequestMap(requestMap, keyList);
+        System.out.println("====filteredRequestMap==="+filteredRequestMap);
+
+        String query = "";
+        String keywordSearchQuery = queryGenerator.getSearchQuery(tableName, filteredRequestMap);
+        if (!("error").equalsIgnoreCase(keywordSearchQuery)) {
+            query = keywordSearchQuery;
+        } else {
+            query = queryGenerator.setSelectQuery(tableName, null);
+        }
+        System.out.println("====keywordSearchQuery===="+keywordSearchQuery);
+
         SQLProcessor sqlProcessor = new SQLProcessor();
         List<Map<String, Object>> queryResult = sqlProcessor.runQuery(query);
 

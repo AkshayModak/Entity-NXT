@@ -6,6 +6,7 @@
   </div>
 
 	<legend>Table Name : ${tableName}</legend>
+	<form method="post" action="getRecords">
 	<div class="row">
 		<div class="col-sm">
 			<table class="table table-condensed">
@@ -34,23 +35,22 @@
 	                </c:choose>
 	              </span>
 	            </td>
-	            <td><input type="text" class="form-control"></td>
+	            <td><input type="text" name="${details.name}" class="form-control"></td>
 	          </tr>
 	        </c:forEach>
 	      </tbody>
 	    </table>
 	  </div>
   </div>
-  <div class="row">
-		<div class="col-xs-6 offset-sm-6">
-			<form method="post" action="getRecords">
+    <div class="row">
+			<div class="col-xs-6 offset-sm-6">
 				<input type="hidden" name="viewRecords" value="${viewRecords}"/>
 				<input type="hidden" name="tableName" value="${tableName}"/>
 				<button type="submit" class="btn btn-primary">Find</button>
 				<button type="button" class="btn btn-primary">Refresh</button>
-			</form>
+			</div>
 		</div>
-	</div>
+	</form>
 
 	<table class="table" style="margin-top: 20px;">
 		<thead>

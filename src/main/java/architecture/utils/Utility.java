@@ -98,4 +98,19 @@ public class Utility {
     public static Boolean isEmpty(Object objValue) {
         return objValue == null;
     }
+
+    public static Map<String, String[]> removeKeyValueFromRequestMap(Map<String, String[]> map, List<String> keyList) {
+        Iterator<Map.Entry<String, String[]>> filterEntries = map.entrySet().iterator();
+
+        Map<String, String[]> resultMap = new HashMap<>();
+
+        while (filterEntries.hasNext()) {
+            Map.Entry<String, String[]> entry = filterEntries.next();
+            String key = entry.getKey();
+            if (!keyList.contains(key)) {
+                resultMap.put(key, entry.getValue());
+            }
+        }
+        return resultMap;
+    }
 }
