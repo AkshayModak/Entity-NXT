@@ -29,32 +29,14 @@ public class NextEngine {
         QueryGenerator queryGenerator = new QueryGenerator(entityDefinitionMap, conn);
 
         try {
-            Map<String, Object> createTableQueries = queryGenerator.createTableQueries();
-            Map<String, Object> dropTableQueries = queryGenerator.dropTableQueries();
-            Map<String, Object> updateColumnQueries = queryGenerator.updateColumn();
+            queryGenerator.createTableQueries();
+            queryGenerator.dropTableQueries();
+            queryGenerator.updateColumn();
 
             stmt = conn.createStatement();
-            if (!("error").equalsIgnoreCase((String) createTableQueries.get("status"))) {
-                for (String createTableQuery : (List<String>) createTableQueries.get("create_table")) {
-                    DebugWrapper.logDebug("====createTableQuery===="+createTableQuery, className);
-                    stmt.addBatch(createTableQuery);
-                }
-            } else {
-                DebugWrapper.logDebug("Unable to create table(s). Bad Table(s) Definition", className);
-            }
-            if (!("error").equalsIgnoreCase((String) dropTableQueries.get("status"))) {
-                for (String dropTableQuery : (List<String>) dropTableQueries.get("drop_table")) {
-                    DebugWrapper.logDebug("====dropTableQuery===="+dropTableQuery, className);
-                    stmt.addBatch(dropTableQuery);
-                }
-            }
-            if (!("error").equalsIgnoreCase((String) updateColumnQueries.get("status"))) {
-                for (String updateColumnQuery : (List<String>) updateColumnQueries.get("update_column")) {
-                    DebugWrapper.logDebug("====updateColumnQuery===="+updateColumnQuery, className);
-                    stmt.addBatch(updateColumnQuery);
-                }
-            } else {
-                DebugWrapper.logDebug("Unable to update Column(s), Bad Column(s) definition.", className);
+            List<String> queryList = queryGenerator.getQueries();
+            for (String query : queryList) {
+                stmt.addBatch(query);
             }
 
             /*NextEngine nextEngine = new NextEngine();

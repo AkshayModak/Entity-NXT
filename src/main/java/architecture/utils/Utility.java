@@ -113,4 +113,15 @@ public class Utility {
         }
         return resultMap;
     }
+
+    public static boolean containsAKeyword(String myString, List<String> keywords){
+        myString = myString.toLowerCase();
+        for(String keyword : keywords){
+            keyword = keyword.toLowerCase();
+            if(myString.contains(keyword)){
+                return true;
+            }
+        }
+        return false; // Never found match.
+    }
 }

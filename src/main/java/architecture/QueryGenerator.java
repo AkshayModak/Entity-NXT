@@ -21,6 +21,7 @@ public class QueryGenerator {
     private Map<String, Object> tablesMap = new HashMap<String, Object>();
     public static final String className = QueryGenerator.class.getName();
     private Connection conn = null;
+    private List<String> queryList = new ArrayList<String>();
 
     public QueryGenerator() {
 
@@ -47,7 +48,7 @@ public class QueryGenerator {
         return (String) map.get(jdbcType);
     }
 
-    protected Map<String, Object> createTableQueries() throws SQLException {
+    protected void createTableQueries() throws SQLException {
 
         if (tablesMap.isEmpty()) {
             Utility.returnError();
@@ -58,7 +59,6 @@ public class QueryGenerator {
 
         ResultSet resultSet;
         Map<String, Object> queryMap = new HashMap<String, Object>();
-        List<String> queryList = new ArrayList<String>();
 
         for (Map.Entry<String, Object> table : tablesMap.entrySet()) {
             String tableName = table.getKey();
@@ -75,7 +75,7 @@ public class QueryGenerator {
                 for (Map<String, Object> column : columnsList) {
                     Map<String, Object> validate_result = validateColumns(column);
                     if (!("success").equalsIgnoreCase((String) validate_result.get("status"))) {
-                        return Utility.returnError();
+                        return;
                     }
                     stringBuffer.append(column.get("name"));
                     stringBuffer.append(" " + column.get("data-type"));
@@ -83,6 +83,15 @@ public class QueryGenerator {
                         stringBuffer.append("(");
                         stringBuffer.append(column.get("column-size"));
                         stringBuffer.append(")");
+                    }
+                    if (column.containsKey("unique")) {
+                        stringBuffer.append(" UNIQUE");
+                    }
+                    if (column.containsKey("nullable") && ("false").equalsIgnoreCase((String) column.get("nullable"))) {
+                        stringBuffer.append(" NOT NULL");
+                    }
+                    if (column.containsKey("auto-increment") && ("true").equalsIgnoreCase((String) column.get("auto-increment"))) {
+                        stringBuffer.append(" AUTO_INCREMENT");
                     }
                     column_index++;
                     if (column_index < columnsList.size()) {
@@ -94,18 +103,15 @@ public class QueryGenerator {
                 queryList.add(stringBuffer.toString());
             }
         }
-        queryMap.put("create_table", queryList);
-        return queryMap;
     }
 
-    protected Map<String, Object> dropTableQueries() throws SQLException {
+    protected void dropTableQueries() throws SQLException {
 
         DatabaseMetaData metadata = null;
         metadata = conn.getMetaData();
 
         ResultSet resultSet;
         Map<String, Object> queryMap = new HashMap<String, Object>();
-        List<String> queryList = new ArrayList<String>();
 
         ResultSet rs = metadata.getTables(null, null, "%", null);
         while (rs.next()) {
@@ -120,15 +126,12 @@ public class QueryGenerator {
                 }
             }
         }
-
-        queryMap.put("drop_table", queryList);
-        return queryMap;
     }
 
-    protected Map<String, Object> createPrimaryKeyConstraint(String tableName) throws SQLException {
+    protected void createPrimaryKeyConstraint(String tableName) throws SQLException {
 
         if (tableName == null || tableName.length() <= 0) {
-            Utility.returnError();
+            return;
         }
 
         DatabaseMetaData metadata = null;
@@ -136,7 +139,6 @@ public class QueryGenerator {
 
         ResultSet resultSet;
         Map<String, Object> queryMap = new HashMap<String, Object>();
-        List<String> queryList = new ArrayList<String>();
 
         ResultSet tableRs = metadata.getTables(null, null, tableName, null);
 
@@ -205,14 +207,12 @@ public class QueryGenerator {
                 queryList.add(stringBuffer.toString());
             }
         }
-        queryMap.put("pk_constraint", queryList);
-        return queryMap;
     }
 
-    protected Map<String, Object> updateColumn() throws SQLException {
+    protected void updateColumn() throws SQLException {
 
         if (tablesMap.isEmpty()) {
-            Utility.returnError();
+            return;
         }
 
         DatabaseMetaData metadata = null;
@@ -221,10 +221,16 @@ public class QueryGenerator {
 
         ResultSet resultSet;
         Map<String, Object> queryMap = new HashMap<String, Object>();
-        List<String> queryList = new ArrayList<String>();
 
         for (Map.Entry<String, Object> table : tablesMap.entrySet()) {
             String tableName = table.getKey();
+
+            Boolean isNewDefinition = Utility.containsAKeyword("CREATE TABLE IF NOT EXISTS "+tableName, queryList);
+
+            if (isNewDefinition) {
+                continue;
+            }
+
             List<Map<String, Object>> tableList = (List<Map<String, Object>>) tablesMap.get(tableName);
 
             ResultSet columnRs = metadata.getColumns(null, null, tableName, "%");
@@ -241,7 +247,7 @@ public class QueryGenerator {
             for (Map<String, Object> columnMap : tableList) {
                 Map<String, Object> validate_result = validateColumns(columnMap);
                 if (!("success").equalsIgnoreCase((String) validate_result.get("status"))) {
-                    return Utility.returnError();
+                    return;
                 }
                 alterList.clear();
                 String columnName = (String) columnMap.get("name");
@@ -353,18 +359,8 @@ public class QueryGenerator {
                     queryList.add(stringBuffer.toString());
                 }
             }
-            Map<String, Object> pk_result = createPrimaryKeyConstraint(tableName);
-            if (pk_result.containsKey("error")) {
-                queryMap.put("status", "error");
-            }
-            List<String> pkList = (List<String>) pk_result.get("pk_constraint");
-            for (String pkString : pkList) {
-                queryList.add(pkString);
-            }
+            createPrimaryKeyConstraint(tableName);
         }
-
-        queryMap.put("update_column", queryList);
-        return queryMap;
     }
 
     public String setSelectQuery(String entity, Map<String, Object> queryParams) {
@@ -531,5 +527,9 @@ public class QueryGenerator {
         }
 
         return Utility.returnSuccess();
+    }
+
+    public List<String> getQueries() {
+        return queryList;
     }
 }
