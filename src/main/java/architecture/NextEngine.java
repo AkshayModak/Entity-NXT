@@ -36,6 +36,7 @@ public class NextEngine {
             stmt = conn.createStatement();
             List<String> queryList = queryGenerator.getQueries();
             for (String query : queryList) {
+                System.out.println("===query===="+query);
                 stmt.addBatch(query);
             }
 

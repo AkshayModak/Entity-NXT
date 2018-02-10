@@ -72,6 +72,7 @@ public class QueryGenerator {
 
                 List<Map<String, Object>> columnsList = (List<Map<String, Object>>) tablesMap.get(tableName);
                 int column_index = 0;
+                List<String> pk_list = new ArrayList<>();
                 for (Map<String, Object> column : columnsList) {
                     Map<String, Object> validate_result = validateColumns(column);
                     if (!("success").equalsIgnoreCase((String) validate_result.get("status"))) {
@@ -84,6 +85,9 @@ public class QueryGenerator {
                         stringBuffer.append(column.get("column-size"));
                         stringBuffer.append(")");
                     }
+                    if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
+                        pk_list.add((String) column.get("name"));
+                    }
                     if (column.containsKey("unique")) {
                         stringBuffer.append(" UNIQUE");
                     }
@@ -94,13 +98,29 @@ public class QueryGenerator {
                         stringBuffer.append(" AUTO_INCREMENT");
                     }
                     column_index++;
-                    if (column_index < columnsList.size()) {
+                    if ((column_index < columnsList.size()) || !pk_list.isEmpty()) {
                         stringBuffer.append(", ");
                     }
                 }
+                if (!pk_list.isEmpty()) {
+                    stringBuffer.append(" PRIMARY KEY (");
+                    Iterator<String> entries = pk_list.iterator();
+
+                    String columns = "";
+                    while (entries.hasNext()) {
+                        columns = columns + entries.next();
+                        if (entries.hasNext()) {
+                            columns = columns + ", ";
+                        }
+                    }
+                    stringBuffer.append(columns);
+                    stringBuffer.append(")");
+                }
                 stringBuffer.append(");");
                 DebugWrapper.logDebug("Creating Table: "+tableName, className);
-                queryList.add(stringBuffer.toString());
+                if (!queryList.contains(stringBuffer.toString())) {
+                    queryList.add(stringBuffer.toString());
+                }
             }
         }
     }
@@ -118,17 +138,22 @@ public class QueryGenerator {
             String mysqlTableName = rs.getString(3);
             if (tablesMap.isEmpty()) {
                 DebugWrapper.logDebug("Dropping Table: "+mysqlTableName, className);
-                queryList.add("DROP TABLE " + mysqlTableName);
+                if (!queryList.contains("DROP TABLE " + mysqlTableName)) {
+                    queryList.add("DROP TABLE " + mysqlTableName);
+                }
             } else {
                 if (tablesMap.get(mysqlTableName) == null) {
                     DebugWrapper.logDebug("Dropping Table: "+mysqlTableName, className);
-                    queryList.add("DROP TABLE " + mysqlTableName);
+                    if (!queryList.contains("DROP TABLE " + mysqlTableName)) {
+                        queryList.add("DROP TABLE " + mysqlTableName);
+                    }
                 }
             }
         }
     }
 
     protected void createPrimaryKeyConstraint(String tableName) throws SQLException {
+        System.out.println("====Inside createPrimaryKeyConstraint===="+tableName);
 
         if (tableName == null || tableName.length() <= 0) {
             return;
@@ -142,7 +167,9 @@ public class QueryGenerator {
 
         ResultSet tableRs = metadata.getTables(null, null, tableName, null);
 
+        System.out.println("====tableRs==="+tableRs);
         if (tableRs.next()) {
+            System.out.println("====tableRs.next()====");
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append("ALTER TABLE ");
             stringBuffer.append(tableName);
@@ -160,9 +187,11 @@ public class QueryGenerator {
                 pk_list.add(primaryKeys.getString("COLUMN_NAME"));
             }
 
+            System.out.println("====pk_list===="+pk_list);
             //TODO: Need to improve the code to update primary key.
             Boolean dropPrimaryKey = false;
             for (Map<String, Object> column : columnsList) {
+                System.out.println("====column.get(\"name\")===="+column.get("name"));
                 if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
                     if (!column.containsKey("nullable") || !("false").equalsIgnoreCase((String) column.get("nullable"))) {
                         DebugWrapper.logDebug("Can't Update Primary Key for table " + tableName + " Column " + column.get("name") + " is not nullable", className);
@@ -175,14 +204,34 @@ public class QueryGenerator {
                         }
                     }
                 } else if (!pk_list.isEmpty() && pk_list.contains((String) column.get("name"))) {
-                    dropPrimaryKey = true;
-                    break;
+                    System.out.println("======pk_listNotEmpty check==========");
+                    /* TODO: Create a generic code or improve logic to remove auto-increment and primary-key with a single Query */
+                    if (!column.containsKey("auto-increment") || !("true").equalsIgnoreCase((String) column.get("auto-increment"))) {
+                        String columnName = (String) column.get("name");
+                        ResultSet columnRs = metadata.getColumns(null, null, tableName, columnName);
+                        if (columnRs.next()) {
+                            Boolean rsIsAutoIncrement = isAutoIncrement(columnRs.getString("IS_AUTOINCREMENT"));
+                            if (rsIsAutoIncrement) {
+                                if (!queryList.contains("ALTER TABLE " + tableName + " DROP COLUMN " + columnName)) {
+                                    queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + columnName);
+                                }
+                            }
+                        }
+                    } else {
+                        System.out.println("======dropping Primary Key==========");
+                        dropPrimaryKey = true;
+                        break;
+                    }
+                    System.out.println(queryList);
                 }
             }
+            System.out.println("====dropPrimaryKey===="+dropPrimaryKey);
             if (dropPrimaryKey) {
-                queryList.add("ALTER TABLE " + tableName + " DROP PRIMARY KEY");
+                if (!queryList.contains("ALTER TABLE " + tableName + " DROP PRIMARY KEY")) {
+                    queryList.add("ALTER TABLE " + tableName + " DROP PRIMARY KEY");
+                }
                 for (Map<String, Object> column : columnsList) {
-                    if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
+                    if (column.containsKey("primary-key") && !("true").equalsIgnoreCase((String) column.get("primary-key"))) {
                         if (pk_index > 0) {
                             stringBuffer.append(", ");
                         }
@@ -201,12 +250,15 @@ public class QueryGenerator {
                     }
                 }
             }
-            stringBuffer.append(");");
+            stringBuffer.append(")");
             if (pk_index > 0) {
                 DebugWrapper.logDebug("Adding Primary Key Constraint on Table: "+tableName, className);
-                queryList.add(stringBuffer.toString());
+                if (!queryList.contains(stringBuffer.toString())) {
+                    queryList.add(stringBuffer.toString());
+                }
             }
         }
+        System.out.println("===queryList==="+queryList);
     }
 
     protected void updateColumn() throws SQLException {
@@ -240,10 +292,13 @@ public class QueryGenerator {
                 String rsColumnName = columnRs.getString("COLUMN_NAME");
                 Boolean hasKeyValue = Utility.hasMapKeyValuePair(tableList, "name", rsColumnName);
                 if (!hasKeyValue) {
-                    queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + rsColumnName);
+                    if (!queryList.contains("ALTER TABLE " + tableName + " DROP COLUMN " + rsColumnName)) {
+                        queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + rsColumnName);
+                    }
                 }
             }
 
+            createPrimaryKeyConstraint(tableName);
             for (Map<String, Object> columnMap : tableList) {
                 Map<String, Object> validate_result = validateColumns(columnMap);
                 if (!("success").equalsIgnoreCase((String) validate_result.get("status"))) {
@@ -307,7 +362,10 @@ public class QueryGenerator {
                         alterList.add(" AUTO_INCREMENT");
                     } else if (!columnMap.containsKey("auto-increment") && (("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type")))
                             && (rsIsAutoIncrement != (Boolean.parseBoolean((String) columnMap.get("auto-increment"))))) {
-                        queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + columnName);
+
+                        if (!queryList.contains("ALTER TABLE " + tableName + " DROP COLUMN " + columnName)) {
+                            queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + columnName);
+                        }
                         StringBuffer stringBuffer = new StringBuffer();
                         stringBuffer.append("ALTER TABLE " + tableName);
                         stringBuffer.append(" ADD COLUMN " + columnName);
@@ -316,10 +374,14 @@ public class QueryGenerator {
                             stringBuffer.append("(" + columnMap.get("column-size") + ") ");
                         }
                         DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
-                        queryList.add(stringBuffer.toString());
-                    } else if (columnMap.containsKey("auto-increment") && ("false".equalsIgnoreCase((String) columnMap.get("auto-increment")))
+                        if (!queryList.contains(stringBuffer.toString())) {
+                            queryList.add(stringBuffer.toString());
+                        }
+                    } else if (columnMap.containsKey("auto-increment") && !("true".equalsIgnoreCase((String) columnMap.get("auto-increment")))
                                 && rsIsAutoIncrement != (Boolean.parseBoolean((String) columnMap.get("auto-increment")))) {
-                        queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + columnName);
+                        if (!queryList.contains("ALTER TABLE " + tableName + " DROP COLUMN " + columnName)) {
+                            queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + columnName);
+                        }
                         StringBuffer stringBuffer = new StringBuffer();
                         stringBuffer.append("ALTER TABLE " + tableName);
                         stringBuffer.append(" ADD COLUMN " + columnName);
@@ -328,7 +390,9 @@ public class QueryGenerator {
                             stringBuffer.append("(" + columnMap.get("column-size") + ") ");
                         }
                         DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
-                        queryList.add(stringBuffer.toString());
+                        if (!queryList.contains(stringBuffer.toString())) {
+                            queryList.add(stringBuffer.toString());
+                        }
                     }
                     if (!alterList.isEmpty()) {
                         StringBuffer stringBuffer = new StringBuffer();
@@ -338,7 +402,9 @@ public class QueryGenerator {
                             stringBuffer.append(" " + alterQuery);
                         }
                         DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
-                        queryList.add(stringBuffer.toString());
+                        if (!queryList.contains(stringBuffer.toString())) {
+                            queryList.add(stringBuffer.toString());
+                        }
                     }
                 } else if (!columnRs.next()){
                     StringBuffer stringBuffer = new StringBuffer();
@@ -356,10 +422,11 @@ public class QueryGenerator {
                         stringBuffer.append(" AUTO_INCREMENT");
                     }
                     DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
-                    queryList.add(stringBuffer.toString());
+                    if (!queryList.contains(stringBuffer.toString())) {
+                        queryList.add(stringBuffer.toString());
+                    }
                 }
             }
-            createPrimaryKeyConstraint(tableName);
         }
     }
 

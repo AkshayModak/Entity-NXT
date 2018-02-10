@@ -118,7 +118,7 @@ public class Utility {
         myString = myString.toLowerCase();
         for(String keyword : keywords){
             keyword = keyword.toLowerCase();
-            if(myString.contains(keyword)){
+            if(keyword.contains(myString)){
                 return true;
             }
         }
