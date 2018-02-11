@@ -153,8 +153,6 @@ public class QueryGenerator {
     }
 
     protected void createPrimaryKeyConstraint(String tableName) throws SQLException {
-        System.out.println("====Inside createPrimaryKeyConstraint===="+tableName);
-
         if (tableName == null || tableName.length() <= 0) {
             return;
         }
@@ -167,9 +165,7 @@ public class QueryGenerator {
 
         ResultSet tableRs = metadata.getTables(null, null, tableName, null);
 
-        System.out.println("====tableRs==="+tableRs);
         if (tableRs.next()) {
-            System.out.println("====tableRs.next()====");
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append("ALTER TABLE ");
             stringBuffer.append(tableName);
@@ -187,16 +183,14 @@ public class QueryGenerator {
                 pk_list.add(primaryKeys.getString("COLUMN_NAME"));
             }
 
-            System.out.println("====pk_list===="+pk_list);
             //TODO: Need to improve the code to update primary key.
             Boolean dropPrimaryKey = false;
             for (Map<String, Object> column : columnsList) {
-                System.out.println("====column.get(\"name\")===="+column.get("name"));
                 if (column.containsKey("primary-key") && ("true").equalsIgnoreCase((String) column.get("primary-key"))) {
-                    if (!column.containsKey("nullable") || !("false").equalsIgnoreCase((String) column.get("nullable"))) {
+                    /*if (!column.containsKey("nullable") || !("false").equalsIgnoreCase((String) column.get("nullable"))) {
                         DebugWrapper.logDebug("Can't Update Primary Key for table " + tableName + " Column " + column.get("name") + " is not nullable", className);
                         break;
-                    }
+                    }*/
                     if (!pk_list.isEmpty()) {
                         if (!pk_list.contains((String) column.get("name"))) {
                             dropPrimaryKey = true;
@@ -204,9 +198,9 @@ public class QueryGenerator {
                         }
                     }
                 } else if (!pk_list.isEmpty() && pk_list.contains((String) column.get("name"))) {
-                    System.out.println("======pk_listNotEmpty check==========");
                     /* TODO: Create a generic code or improve logic to remove auto-increment and primary-key with a single Query */
-                    if (!column.containsKey("auto-increment") || !("true").equalsIgnoreCase((String) column.get("auto-increment"))) {
+                    if ((!column.containsKey("auto-increment") || !("true").equalsIgnoreCase((String) column.get("auto-increment")))
+                            && (!column.containsKey("primary-key") || !("true").equalsIgnoreCase((String) column.get("primary-key")))) {
                         String columnName = (String) column.get("name");
                         ResultSet columnRs = metadata.getColumns(null, null, tableName, columnName);
                         if (columnRs.next()) {
@@ -215,17 +209,17 @@ public class QueryGenerator {
                                 if (!queryList.contains("ALTER TABLE " + tableName + " DROP COLUMN " + columnName)) {
                                     queryList.add("ALTER TABLE " + tableName + " DROP COLUMN " + columnName);
                                 }
+                            } else {
+                                dropPrimaryKey = true;
+                                break;
                             }
                         }
                     } else {
-                        System.out.println("======dropping Primary Key==========");
                         dropPrimaryKey = true;
                         break;
                     }
-                    System.out.println(queryList);
                 }
             }
-            System.out.println("====dropPrimaryKey===="+dropPrimaryKey);
             if (dropPrimaryKey) {
                 if (!queryList.contains("ALTER TABLE " + tableName + " DROP PRIMARY KEY")) {
                     queryList.add("ALTER TABLE " + tableName + " DROP PRIMARY KEY");
@@ -258,7 +252,6 @@ public class QueryGenerator {
                 }
             }
         }
-        System.out.println("===queryList==="+queryList);
     }
 
     protected void updateColumn() throws SQLException {
@@ -298,7 +291,6 @@ public class QueryGenerator {
                 }
             }
 
-            createPrimaryKeyConstraint(tableName);
             for (Map<String, Object> columnMap : tableList) {
                 Map<String, Object> validate_result = validateColumns(columnMap);
                 if (!("success").equalsIgnoreCase((String) validate_result.get("status"))) {
@@ -341,7 +333,7 @@ public class QueryGenerator {
                         } else {
                             alterList.add(" NULL");
                         }
-                    } else if (!columnMap.containsKey("nullable")) {
+                    } else if (!columnMap.containsKey("nullable") && !(columnMap.containsKey("primary-key")) && ("true").equalsIgnoreCase((String) columnMap.get("data-type"))) {
                         if (!isNullable) {
                             if (!("INTEGER").equalsIgnoreCase((String) columnMap.get("data-type"))) {
                                 alterList.add((String) columnMap.get("data-type") + " (" + columnMap.get("column-size") + ") ");
@@ -372,6 +364,11 @@ public class QueryGenerator {
                         stringBuffer.append(" " + columnMap.get("data-type"));
                         if (!"INTEGER".equalsIgnoreCase((String) columnMap.get("data-type"))) {
                             stringBuffer.append("(" + columnMap.get("column-size") + ") ");
+                        }
+                        if(columnMap.containsKey("nullable") && "false".equalsIgnoreCase((String) columnMap.get("nullable"))) {
+                            if (!columnMap.containsKey("primary-key") || ("false").equalsIgnoreCase((String) columnMap.get("primary-key"))) {
+                                stringBuffer.append(" NOT NULL");
+                            }
                         }
                         DebugWrapper.logDebug("Altering column: " + columnName + " of table: " + tableName, className);
                         if (!queryList.contains(stringBuffer.toString())) {
@@ -427,6 +424,7 @@ public class QueryGenerator {
                     }
                 }
             }
+            createPrimaryKeyConstraint(tableName);
         }
     }
 
