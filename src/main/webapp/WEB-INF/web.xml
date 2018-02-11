@@ -2,53 +2,13 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
   <display-name>Next ORM</display-name>
   <servlet>
-    <servlet-name>NextEngine</servlet-name>
-    <servlet-class>architecture.DriverServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>ShowData</servlet-name>
-    <servlet-class>com.next.demo.ShowData</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>ShowTableDetails</servlet-name>
-    <servlet-class>com.next.demo.ShowTableDetails</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>GetRecords</servlet-name>
-    <servlet-class>com.next.demo.GetRecords</servlet-class>
-  </servlet>
-  <servlet>
     <servlet-name>SQLEngine</servlet-name>
     <jsp-file>/templates/sql-engine.jsp</jsp-file>
   </servlet>
-  <servlet>
-    <servlet-name>CustomQuery</servlet-name>
-    <servlet-class>com.next.demo.CustomQuery</servlet-class>
-  </servlet>
 
 
-  <servlet-mapping>
-    <servlet-name>NextEngine</servlet-name>
-    <url-pattern>/run</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>ShowData</servlet-name>
-    <url-pattern>/showData</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>ShowTableDetails</servlet-name>
-    <url-pattern>/showTable</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>GetRecords</servlet-name>
-    <url-pattern>/getRecords</url-pattern>
-  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>SQLEngine</servlet-name>
     <url-pattern>/sql-engine</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>CustomQuery</servlet-name>
-    <url-pattern>/executeQuery</url-pattern>
   </servlet-mapping>
 </web-app>

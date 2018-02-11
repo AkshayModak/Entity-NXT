@@ -5,6 +5,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.annotation.WebServlet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import architecture.utils.Utility;
 
 import java.util.Iterator;
 
+@WebServlet("/getRecords")
 public class GetRecords extends HttpServlet {
     private static final long serialVersionUID = 1L;
 

@@ -72,6 +72,7 @@ buildscript {
 
 tomcat {
     contextPath = "/";
+    httpPort = 8080;
     tomcatRun.configFile = file("src/main/java/configs/orm-context.xml")
 }
 
