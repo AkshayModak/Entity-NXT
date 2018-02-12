@@ -65,5 +65,5 @@ Map<String, Object> result = EntityQuery.remove("entity_name", pkMap);
 
 ## Credits:
 
-[gradle-tomcat-plugin](https://github.com/bmuschko/gradle-tomcat-plugin) -- Gradle Tomcat Server used for development purpose.
-[Bootstrap 4](https://getbootstrap.com/) -- UI Console developed with bootstrap 4.
+* [gradle-tomcat-plugin](https://github.com/bmuschko/gradle-tomcat-plugin) -- Gradle Tomcat Server used for development purpose.
+* [Bootstrap 4](https://getbootstrap.com/) -- UI Console developed with bootstrap 4.
