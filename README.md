@@ -4,7 +4,7 @@ Entity-NXT is a mini ORM for small Java websites. You can create, update, delete
 
 ## Getting Started
 
-You just need to put the Jar file in the lib folder of your web application.
+You just need to put the Jar file in the lib folder of your web application. You can find the Jar file in the api directory.
 
 ## Examples
 
