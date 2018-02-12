@@ -8,21 +8,62 @@ You just need to put the Jar file in the lib folder of your web application.
 
 ## Examples
 
-EntityQuery is the Class you need to be familiar about to access the create, update, remove and fetching feature of the api.
+EntityQuery is the class you need to be familiar about to access the create, update, remove and fetching features of the api.
 
-### To Fetch all records from the entity:
+### To fetch all records from the entity:
 
 ```
-List<Map<String, Object> result = EntityQuery.getAll("test_entity");
+List<Map<String, Object> result = EntityQuery.getAll("entity_name");
 ```
-### To Fetch First record from the entity:
+### To fetch first record from the entity:
+
+Here, you can pass the parameters in a HashMap with which you want to fetch the reords.
+
+For Example: If you want a unique record, you can pass the primary keys values of the entity. The api will fetch the records corresponding to the primary key.
 
 ```
 Map<String, Object> getFirstCtx = new HashMap<>();
 getFirstCtx.put("column_name", "value");
-Map<String, Object> getFirst = EntityQuery.getFirst("test_entity", getFirstCtx);
+Map<String, Object> getFirst = EntityQuery.getFirst("entity_name", getFirstCtx);
 ```
 
-In the above example you can pass the parameters in a HashMap with which you want to fetch the record with.
+### To insert record in the entity:
 
+```
+Map<String, Object> insertMap = new HashMap<>();
+insert.put("column_one", "value_one");
+insert.put("column_two", "value_two");
 
+Map<String, Object> result = EntityQuery.insert("entity_name", insertMap);
+```
+
+### To update record in the entity:
+
+To Update record you need to pass all the primary keys of the entity.
+
+```
+Map<String, Object> updateMap = new HashMap<>();
+updateMap.put("column_one", "value_one");
+updateMap.put("column_two", "value_two");
+
+Map<String, Object> pkMap = new HashMap<>();
+pkMap.put("column_one", "value_one");
+
+Map<String, Object> updateResult = EntityQuery.update("entity_name", updateParams, primaryKeyParams);
+```
+### To remove record from the entity:
+
+To remove a particular record, you need to pass all the primary keys of the entity.
+
+```
+Map<String, Object> pkMap = new HashMap<>();
+pkMap.put("column_one", "value_one");
+pkMap.put("column_two", "value_two");
+
+Map<String, Object> result = EntityQuery.remove("entity_name", pkMap);
+```
+
+## Credits:
+
+[gradle-tomcat-plugin](https://github.com/bmuschko/gradle-tomcat-plugin) -- Gradle Tomcat Server used for development purpose.
+[Bootstrap 4](https://getbootstrap.com/) -- UI Console developed with bootstrap 4.
